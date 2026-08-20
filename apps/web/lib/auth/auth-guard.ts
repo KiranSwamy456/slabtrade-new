@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { authStorage } from "./auth-storage";
 import { getRoleDashboard } from "./role-redirect";
 import type { User } from "@/types/auth";
 
-type RoleName = "customer" | "vendor" | "support" | "admin";
+export type RoleName = "customer" | "vendor" | "support" | "admin";
 
 type UseAuthGuardOptions = {
   allowedRoles?: RoleName[];
@@ -29,40 +29,72 @@ export function useAuthGuard(
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
+  /*
+   * Convert the roles array into a stable string.
+   *
+   * This prevents the effect from running repeatedly when
+   * allowedRoles is passed as a new array on every render.
+   */
+  const allowedRolesKey = useMemo(
+    () => options?.allowedRoles?.join("|") ?? "",
+    [options?.allowedRoles],
+  );
+
   useEffect(() => {
     const authenticatedUser = authStorage.getUser();
 
+    /*
+     * No authenticated user
+     */
     if (!authenticatedUser) {
       setUser(null);
       setIsAuthorized(false);
       setIsLoading(false);
 
-      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+      const loginUrl = `/login?redirect=${encodeURIComponent(pathname)}`;
+
+      if (pathname !== "/login") {
+        router.replace(loginUrl);
+      }
 
       return;
     }
 
     setUser(authenticatedUser);
 
+    /*
+     * Get user's role
+     */
     const role = authenticatedUser.role?.name?.toLowerCase() as
       | RoleName
       | undefined;
 
-    if (
-      options?.allowedRoles &&
-      (!role || !options.allowedRoles.includes(role))
-    ) {
+    /*
+     * Check role authorization
+     */
+    const allowedRoles = allowedRolesKey
+      ? (allowedRolesKey.split("|") as RoleName[])
+      : undefined;
+
+    if (allowedRoles && (!role || !allowedRoles.includes(role))) {
       setIsAuthorized(false);
       setIsLoading(false);
 
-      router.replace(getRoleDashboard(authenticatedUser));
+      const dashboard = getRoleDashboard(authenticatedUser);
+
+      if (pathname !== dashboard) {
+        router.replace(dashboard);
+      }
 
       return;
     }
 
+    /*
+     * Authorized
+     */
     setIsAuthorized(true);
     setIsLoading(false);
-  }, [router, pathname, options?.allowedRoles]);
+  }, [pathname, router, allowedRolesKey]);
 
   return {
     user,

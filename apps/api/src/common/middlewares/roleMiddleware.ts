@@ -1,37 +1,34 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
-import { AuthenticatedRequest } from "@modules/auth/auth.types";
+type RoleName = "Customer" | "Vendor" | "Support" | "Admin";
 
-export const requireRoles = (...allowedRoles: string[]) => {
-  return (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction,
-  ): void => {
-    if (!req.user) {
-      res.status(401).json({
+export const roleMiddleware = (...allowedRoles: RoleName[]) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const userRole = req.user?.role;
+
+    if (!userRole) {
+      res.status(403).json({
         success: false,
-        message: "Authentication required",
+        message: "User role is required",
+        errors: [],
       });
+
       return;
     }
 
-    if (!req.user.role) {
+    if (!allowedRoles.includes(userRole as RoleName)) {
       res.status(403).json({
         success: false,
-        message: "User role is not assigned",
+        message: "You do not have permission to perform this action",
+        errors: [],
       });
-      return;
-    }
 
-    if (!allowedRoles.includes(req.user.role)) {
-      res.status(403).json({
-        success: false,
-        message: "You do not have permission to access this resource",
-      });
       return;
     }
 
     next();
   };
 };
+
+// Alias for newer routes
+export const requireRole = roleMiddleware;

@@ -1,0 +1,276 @@
+.page {
+    min-height: 100vh;
+    background: #f8fafc;
+    padding: 48px 24px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 28px;
+}
+
+.backLink {
+    display: inline-block;
+    margin-bottom: 18px;
+    color: #2563eb;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.backLink:hover {
+    text-decoration: underline;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.header p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 15px;
+}
+
+.card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+}
+
+.section {
+    padding: 28px 32px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sectionHeader {
+    margin-bottom: 22px;
+}
+
+.sectionHeader h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 650;
+    color: #0f172a;
+}
+
+.sectionHeader p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 20px;
+}
+
+.field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.field label span {
+    color: #ef4444;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    height: 46px;
+    padding: 0 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    color: #0f172a;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.field input::placeholder {
+    color: #94a3b8;
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.field input:disabled {
+    background: #f1f5f9;
+    cursor: not-allowed;
+}
+
+.field small,
+.section>small {
+    color: #dc2626;
+    font-size: 12px;
+}
+
+.roleGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.roleCard {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 17px;
+    text-align: left;
+    border: 1px solid #dbe3ee;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.roleCard:hover {
+    border-color: #93c5fd;
+}
+
+.roleCardActive {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+
+.roleRadio {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 1px solid #cbd5e1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.roleCardActive .roleRadio {
+    border-color: #2563eb;
+    background: #2563eb;
+}
+
+.roleCard strong {
+    display: block;
+    color: #0f172a;
+    font-size: 14px;
+}
+
+.roleCard p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.passwordWrapper {
+    position: relative;
+}
+
+.passwordWrapper input {
+    padding-right: 70px;
+}
+
+.eyeButton {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 22px 32px;
+    background: #f8fafc;
+}
+
+.cancel,
+.submit {
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancel {
+    border: 1px solid #cbd5e1;
+    background: white;
+    color: #334155;
+}
+
+.cancel:hover {
+    background: #f8fafc;
+}
+
+.submit {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: white;
+}
+
+.submit:hover {
+    background: #1d4ed8;
+}
+
+.cancel:disabled,
+.submit:disabled,
+.roleCard:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+    .page {
+        padding: 28px 16px;
+    }
+
+    .section {
+        padding: 22px 20px;
+    }
+
+    .grid,
+    .roleGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        padding: 18px 20px;
+    }
+}

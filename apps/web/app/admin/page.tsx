@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
+
 import { useAuthGuard } from "@/lib/auth/auth-guard";
 import LogoutButton from "@/components/auth/LogoutButton";
 
-export default function AdminPage() {
+export default function AdminUsersPage() {
   const { user, isLoading, isAuthorized } = useAuthGuard({
     allowedRoles: ["admin"],
   });
@@ -22,13 +24,26 @@ export default function AdminPage() {
 
   return (
     <main style={{ padding: 40 }}>
-      <h1>Admin Dashboard</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 30,
+        }}
+      >
+        <div>
+          <h1>Users</h1>
 
-      <p>Welcome, {user.firstName}</p>
+          <p>Manage Granite Marketplace users and their roles.</p>
+        </div>
 
-      <p>
-        You are logged in as <strong>{user.role?.name}</strong>.
-      </p>
+        <Link href="/admin/users/create">+ Create User</Link>
+      </div>
+
+      <div>
+        <p>User management will appear here.</p>
+      </div>
 
       <LogoutButton />
     </main>
