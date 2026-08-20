@@ -1,0 +1,181 @@
+.header {
+    margin-bottom: 32px;
+}
+
+.header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 32px;
+    line-height: 1.2;
+    letter-spacing: -0.8px;
+}
+
+.header p {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.field label {
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.passwordHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.forgotButton {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #2563eb;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.forgotButton:hover {
+    text-decoration: underline;
+}
+
+.field input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 48px;
+    padding: 0 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    background: white;
+    color: #0f172a;
+    font-size: 14px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.field input::placeholder {
+    color: #94a3b8;
+}
+
+.field input:hover {
+    border-color: #94a3b8;
+}
+
+.field input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.field input:disabled {
+    cursor: not-allowed;
+    background: #f8fafc;
+}
+
+.error {
+    padding: 12px 14px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.submit {
+    width: 100%;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    margin-top: 2px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #2563eb;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.1s ease;
+}
+
+.submit:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.submit:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: white;
+
+    border-radius: 50%;
+
+    animation: spin 0.7s linear infinite;
+}
+
+.registerText {
+    margin: 4px 0 0;
+
+    color: #64748b;
+    text-align: center;
+    font-size: 13px;
+}
+
+.registerText a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.registerText a:hover {
+    text-decoration: underline;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 550px) {
+    .header h1 {
+        font-size: 27px;
+    }
+}

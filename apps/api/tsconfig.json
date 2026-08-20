@@ -1,0 +1,59 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "moduleDetection": "force",
+
+    "allowJs": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    "sourceMap": true,
+    "declaration": true,
+
+    "baseUrl": "./src",
+
+   "paths": {
+  "@/*": ["*"],
+
+  "@bootstrap": ["bootstrap/index.ts"],
+  "@bootstrap/*": ["bootstrap/*"],
+
+  "@config": ["config/index.ts"],
+  "@config/*": ["config/*"],
+
+  "@common/errors": ["common/errors/index.ts"],
+  "@common/logger": ["common/logger/index.ts"],
+  "@common/middlewares": ["common/middlewares/index.ts"],
+  "@common/responses": ["common/responses/index.ts"],
+  "@common/utils": ["common/utils/index.ts"],
+
+  "@common/*": ["common/*"],
+
+  "@database/*": ["database/*"],
+  "@modules/*": ["modules/*"],
+  "@routes/*": ["routes/*"],
+  "@swagger/*": ["swagger/*"]
+},
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
