@@ -7,9 +7,15 @@ import Link from "next/link";
 import { z } from "zod";
 import { toast } from "sonner";
 
-import styles from "./create-user.module.css";
 import { userService } from "@/services/user.service";
 import { authStorage } from "@/lib/auth/auth-storage";
+import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
 const createUserSchema = z
   .object({
     firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -34,6 +40,16 @@ type CreateUserFormData = {
   confirmPassword: string;
   role: "Customer" | "Vendor" | "Support" | "Admin";
 };
+
+const ROLE_OPTIONS: {
+  value: CreateUserFormData["role"];
+  description: string;
+}[] = [
+  { value: "Customer", description: "Marketplace customer" },
+  { value: "Vendor", description: "Marketplace seller" },
+  { value: "Support", description: "Customer support" },
+  { value: "Admin", description: "System administrator" },
+];
 
 export default function CreateUserPage() {
   const router = useRouter();
@@ -153,40 +169,44 @@ export default function CreateUserPage() {
 
     return true;
   };
+
   return (
-    <main className={styles.page}>
-      <div className={styles.container}>
-        {/* Header */}
-        <div className={styles.header}>
-          <div>
-            <Link href="/admin" className={styles.backLink}>
-              ← Back to Users
-            </Link>
+    <main className="min-h-screen bg-slate-50 px-6 py-12 max-[700px]:px-4 max-[700px]:py-7">
+      <div className="mx-auto max-w-[1000px]">
+        <div className="mb-7">
+          <Link
+            href="/admin/users"
+            className="mb-4 inline-block text-sm text-blue-600 hover:underline"
+          >
+            ← Back to Users
+          </Link>
 
-            <h1>Create User</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Create User</h1>
 
-            <p>Create a new Granite Marketplace user and assign their role.</p>
-          </div>
+          <p className="mt-2 text-[15px] text-slate-500">
+            Create a new Slab Trade user and assign their role.
+          </p>
         </div>
 
-        {/* Card */}
-        <div className={styles.card}>
+        <Card className="gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-0">
           <form onSubmit={handleSubmit}>
-            {/* Basic information */}
-            <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2>Basic information</h2>
-
-                <p>User account details</p>
+            <section className="border-b border-slate-200 p-7 px-8 max-[700px]:p-5">
+              <div className="mb-[22px]">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Basic information
+                </h2>
+                <p className="mt-[5px] text-sm text-slate-500">
+                  User account details
+                </p>
               </div>
 
-              <div className={styles.grid}>
-                <div className={styles.field}>
-                  <label htmlFor="firstName">
-                    First name <span>*</span>
-                  </label>
+              <div className="grid grid-cols-2 gap-5 max-[700px]:grid-cols-1">
+                <div className="mb-4 flex flex-col gap-1.5">
+                  <Label htmlFor="firstName" className="text-xs text-slate-700">
+                    First name <span className="text-red-500">*</span>
+                  </Label>
 
-                  <input
+                  <Input
                     id="firstName"
                     type="text"
                     placeholder="John"
@@ -195,15 +215,22 @@ export default function CreateUserPage() {
                       handleChange("firstName", event.target.value)
                     }
                     disabled={loading}
+                    className="h-9"
                   />
 
-                  {errors.firstName && <small>{errors.firstName}</small>}
+                  {errors.firstName && (
+                    <small className="text-xs text-red-600">
+                      {errors.firstName}
+                    </small>
+                  )}
                 </div>
 
-                <div className={styles.field}>
-                  <label htmlFor="lastName">Last name</label>
+                <div className="mb-4 flex flex-col gap-1.5">
+                  <Label htmlFor="lastName" className="text-xs text-slate-700">
+                    Last name
+                  </Label>
 
-                  <input
+                  <Input
                     id="lastName"
                     type="text"
                     placeholder="Doe"
@@ -212,115 +239,132 @@ export default function CreateUserPage() {
                       handleChange("lastName", event.target.value)
                     }
                     disabled={loading}
+                    className="h-9"
                   />
 
-                  {errors.lastName && <small>{errors.lastName}</small>}
+                  {errors.lastName && (
+                    <small className="text-xs text-red-600">
+                      {errors.lastName}
+                    </small>
+                  )}
                 </div>
               </div>
 
-              <div className={styles.field}>
-                <label htmlFor="email">
-                  Email address <span>*</span>
-                </label>
+              <div className="grid grid-cols-2 gap-5 max-[700px]:grid-cols-1">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="email" className="text-xs text-slate-700">
+                    Email address <span className="text-red-500">*</span>
+                  </Label>
 
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  value={formData.email}
-                  onChange={(event) =>
-                    handleChange("email", event.target.value)
-                  }
-                  disabled={loading}
-                />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="john@example.com"
+                    value={formData.email}
+                    onChange={(event) =>
+                      handleChange("email", event.target.value)
+                    }
+                    disabled={loading}
+                    className="h-9"
+                  />
 
-                {errors.email && <small>{errors.email}</small>}
-              </div>
+                  {errors.email && (
+                    <small className="text-xs text-red-600">
+                      {errors.email}
+                    </small>
+                  )}
+                </div>
 
-              <div className={styles.field}>
-                <label htmlFor="phone">Phone number</label>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="phone" className="text-xs text-slate-700">
+                    Phone number
+                  </Label>
 
-                <input
-                  id="phone"
-                  type="tel"
-                  placeholder="+91 98765 43210"
-                  value={formData.phone}
-                  onChange={(event) =>
-                    handleChange("phone", event.target.value)
-                  }
-                  disabled={loading}
-                />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    value={formData.phone}
+                    onChange={(event) =>
+                      handleChange("phone", event.target.value)
+                    }
+                    disabled={loading}
+                    className="h-9"
+                  />
+                </div>
               </div>
             </section>
 
-            {/* Role */}
-            <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2>Account role</h2>
-
-                <p>Choose the role this user will have.</p>
+            <section className="border-b border-slate-200 p-7 px-8 max-[700px]:p-5">
+              <div className="mb-[22px]">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Account role
+                </h2>
+                <p className="mt-[5px] text-sm text-slate-500">
+                  Choose the role this user will have.
+                </p>
               </div>
 
-              <div className={styles.roleGrid}>
-                {[
-                  {
-                    value: "Customer",
-                    description: "Marketplace customer",
-                  },
-                  {
-                    value: "Vendor",
-                    description: "Marketplace seller",
-                  },
-                  {
-                    value: "Support",
-                    description: "Customer support",
-                  },
-                  {
-                    value: "Admin",
-                    description: "System administrator",
-                  },
-                ].map((role) => (
+              <div className="grid grid-cols-4 gap-3.5 max-[900px]:grid-cols-2 max-[420px]:grid-cols-1">
+                {ROLE_OPTIONS.map((role) => (
                   <button
                     key={role.value}
                     type="button"
-                    className={`${styles.roleCard} ${
-                      formData.role === role.value ? styles.roleCardActive : ""
-                    }`}
+                    className={cn(
+                      "flex items-start gap-2.5 rounded-lg border border-slate-200 bg-white p-3.5 text-left transition-colors hover:border-blue-300",
+                      formData.role === role.value &&
+                        "border-blue-600 bg-blue-50 shadow-[0_0_0_1px_#2563eb] hover:border-blue-600",
+                    )}
                     onClick={() => handleChange("role", role.value)}
                     disabled={loading}
                   >
-                    <div className={styles.roleRadio}>
+                    <div
+                      className={cn(
+                        "flex size-[22px] shrink-0 items-center justify-center rounded-full border border-slate-300 text-xs font-bold text-white",
+                        formData.role === role.value && "border-blue-600 bg-blue-600",
+                      )}
+                    >
                       {formData.role === role.value ? "✓" : ""}
                     </div>
 
                     <div>
-                      <strong>{role.value}</strong>
+                      <strong className="text-sm text-slate-900">
+                        {role.value}
+                      </strong>
 
-                      <p>{role.description}</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {role.description}
+                      </p>
                     </div>
                   </button>
                 ))}
               </div>
 
-              {errors.role && <small>{errors.role}</small>}
+              {errors.role && (
+                <small className="mt-2 block text-xs text-red-600">
+                  {errors.role}
+                </small>
+              )}
             </section>
 
-            {/* Password */}
-            <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2>Security</h2>
-
-                <p>Set the user's initial password.</p>
+            <section className="border-b border-slate-200 p-7 px-8 max-[700px]:p-5">
+              <div className="mb-[22px]">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Security
+                </h2>
+                <p className="mt-[5px] text-sm text-slate-500">
+                  Set the user&apos;s initial password.
+                </p>
               </div>
 
-              <div className={styles.grid}>
-                <div className={styles.field}>
-                  <label htmlFor="password">
-                    Password <span>*</span>
-                  </label>
+              <div className="grid grid-cols-2 gap-5 max-[700px]:grid-cols-1">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="password" className="text-xs text-slate-700">
+                    Password <span className="text-red-500">*</span>
+                  </Label>
 
-                  <div className={styles.passwordWrapper}>
-                    <input
+                  <div className="relative">
+                    <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Minimum 8 characters"
@@ -329,27 +373,35 @@ export default function CreateUserPage() {
                         handleChange("password", event.target.value)
                       }
                       disabled={loading}
+                      className="h-9 pr-[70px]"
                     />
 
                     <button
                       type="button"
-                      className={styles.eyeButton}
+                      className="absolute top-1/2 right-2.5 -translate-y-1/2 text-xs font-semibold text-blue-600"
                       onClick={() => setShowPassword((previous) => !previous)}
                     >
                       {showPassword ? "Hide" : "Show"}
                     </button>
                   </div>
 
-                  {errors.password && <small>{errors.password}</small>}
+                  {errors.password && (
+                    <small className="text-xs text-red-600">
+                      {errors.password}
+                    </small>
+                  )}
                 </div>
 
-                <div className={styles.field}>
-                  <label htmlFor="confirmPassword">
-                    Confirm password <span>*</span>
-                  </label>
+                <div className="flex flex-col gap-1.5">
+                  <Label
+                    htmlFor="confirmPassword"
+                    className="text-xs text-slate-700"
+                  >
+                    Confirm password <span className="text-red-500">*</span>
+                  </Label>
 
-                  <div className={styles.passwordWrapper}>
-                    <input
+                  <div className="relative">
+                    <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Enter password again"
@@ -358,11 +410,12 @@ export default function CreateUserPage() {
                         handleChange("confirmPassword", event.target.value)
                       }
                       disabled={loading}
+                      className="h-9 pr-[70px]"
                     />
 
                     <button
                       type="button"
-                      className={styles.eyeButton}
+                      className="absolute top-1/2 right-2.5 -translate-y-1/2 text-xs font-semibold text-blue-600"
                       onClick={() =>
                         setShowConfirmPassword((previous) => !previous)
                       }
@@ -372,32 +425,35 @@ export default function CreateUserPage() {
                   </div>
 
                   {errors.confirmPassword && (
-                    <small>{errors.confirmPassword}</small>
+                    <small className="text-xs text-red-600">
+                      {errors.confirmPassword}
+                    </small>
                   )}
                 </div>
               </div>
             </section>
 
-            {/* Actions */}
-            <div className={styles.actions}>
-              <button
+            <div className="flex justify-end gap-3 bg-slate-50 px-8 py-6 max-[700px]:px-5">
+              <Button
                 type="button"
-                className={styles.cancel}
-                onClick={() => router.push("/admin")}
+                variant="outline"
+                className="h-9"
+                onClick={() => router.push("/admin/users")}
                 disabled={loading}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <LoadingButton
                 type="submit"
-                className={styles.submit}
-                disabled={loading}
+                className="h-9"
+                loading={loading}
+                loadingText="Creating..."
               >
-                {loading ? "Creating..." : "Create User"}
-              </button>
+                Create User
+              </LoadingButton>
             </div>
           </form>
-        </div>
+        </Card>
       </div>
     </main>
   );

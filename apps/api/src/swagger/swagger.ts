@@ -5,10 +5,10 @@ export const swaggerSpec = swaggerJSDoc({
     openapi: "3.0.3",
 
     info: {
-      title: "Granite Marketplace API",
+      title: "Slab Trade API",
       version: "1.0.0",
       description:
-        "Granite Marketplace REST API for authentication, users, marketplace operations, and role-based access control.",
+        "Slab Trade REST API for authentication, users, marketplace operations, and role-based access control.",
     },
 
     servers: [

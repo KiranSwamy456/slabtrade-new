@@ -1,8 +1,8 @@
 import type { User } from "@/types/auth";
 
-const ACCESS_TOKEN_KEY = "granite_access_token";
-const REFRESH_TOKEN_KEY = "granite_refresh_token";
-const USER_KEY = "granite_user";
+const ACCESS_TOKEN_KEY = "slabtrade_access_token";
+const REFRESH_TOKEN_KEY = "slabtrade_refresh_token";
+const USER_KEY = "slabtrade_user";
 
 export const authStorage = {
   setAuth(data: { accessToken: string; refreshToken: string; user: User }) {

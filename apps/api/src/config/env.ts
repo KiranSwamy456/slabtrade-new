@@ -7,7 +7,7 @@ export const env = {
 
   PORT: Number(process.env.PORT || 5000),
 
-  APP_NAME: process.env.APP_NAME || "Granite Marketplace API",
+  APP_NAME: process.env.APP_NAME || "Slab Trade API",
 
   API_PREFIX: process.env.API_PREFIX || "/api",
 

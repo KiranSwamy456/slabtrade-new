@@ -32,6 +32,16 @@ export class AuthService {
       throw new AppError("Email already registered", 409);
     }
 
+    if (data.phone) {
+      const existingPhone = await this.authRepository.findUserByPhone(
+        data.phone,
+      );
+
+      if (existingPhone) {
+        throw new AppError("Phone number already registered", 409);
+      }
+    }
+
     const hashedPassword = await hashPassword(data.password);
 
     const customerRole = await this.authRepository.findRoleByName("Customer");

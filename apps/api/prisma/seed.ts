@@ -19,6 +19,10 @@ async function main() {
         name: "Customer",
         description: "Marketplace Customer",
       },
+      {
+        name: "Support",
+        description: "Customer Support",
+      },
     ],
     skipDuplicates: true,
   });

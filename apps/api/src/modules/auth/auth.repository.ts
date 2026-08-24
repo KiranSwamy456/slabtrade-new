@@ -12,6 +12,14 @@ export class AuthRepository {
     });
   }
 
+  async findUserByPhone(phone: string) {
+    return prisma.user.findUnique({
+      where: {
+        phone,
+      },
+    });
+  }
+
   async findUserById(id: string) {
     return prisma.user.findUnique({
       where: {

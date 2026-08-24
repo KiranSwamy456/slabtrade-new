@@ -23,6 +23,45 @@ export class UserRepository {
     });
   }
 
+  async findAll() {
+    return prisma.user.findMany({
+      where: {
+        deletedAt: null,
+      },
+      include: {
+        role: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
+  async findById(id: string) {
+    return prisma.user.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        role: true,
+      },
+    });
+  }
+
+  async updateStatus(id: string, isActive: boolean) {
+    return prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        isActive,
+      },
+      include: {
+        role: true,
+      },
+    });
+  }
+
   async findRoleByName(name: string) {
     return prisma.role.findUnique({
       where: {

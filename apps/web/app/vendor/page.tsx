@@ -1,36 +1,27 @@
 "use client";
 
 import { useAuthGuard } from "@/lib/auth/auth-guard";
-import LogoutButton from "@/components/auth/LogoutButton";
+import { AccountOverviewCard } from "@/components/dashboard/AccountOverviewCard";
 
 export default function VendorPage() {
-  const { user, isLoading, isAuthorized } = useAuthGuard({
-    allowedRoles: ["vendor"],
-  });
+  const { user } = useAuthGuard({ allowedRoles: ["vendor"] });
 
-  if (isLoading) {
-    return (
-      <main style={{ padding: 40 }}>
-        <p>Loading...</p>
-      </main>
-    );
-  }
-
-  if (!isAuthorized || !user) {
+  if (!user) {
     return null;
   }
 
   return (
-    <main style={{ padding: 40 }}>
-      <h1>Vendor Dashboard</h1>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900">
+          Welcome, {user.firstName}
+        </h2>
+        <p className="mt-1 text-slate-500">
+          Here&apos;s an overview of your Slab Trade account.
+        </p>
+      </div>
 
-      <p>Welcome, {user.firstName}</p>
-
-      <p>
-        You are logged in as <strong>{user.role?.name}</strong>.
-      </p>
-
-      <LogoutButton />
-    </main>
+      <AccountOverviewCard user={user} />
+    </div>
   );
 }

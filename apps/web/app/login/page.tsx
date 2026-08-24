@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import AuthLayout from "@/components/auth/AuthLayout";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import { loginSchema } from "@/lib/validations/auth";
 import { authService } from "@/services/auth.service";
 import { authStorage } from "@/lib/auth/auth-storage";
 import { getRoleDashboard } from "@/lib/auth/role-redirect";
-
-import styles from "./login.module.css";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -104,17 +106,23 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <div className={styles.header}>
-        <h1>Welcome back</h1>
+      <div className="mb-8">
+        <h1 className="text-[32px] leading-tight tracking-[-0.8px] text-slate-900 max-[550px]:text-[27px]">
+          Welcome back
+        </h1>
 
-        <p>Sign in to your Granite Marketplace account.</p>
+        <p className="mt-2.5 text-[15px] leading-relaxed text-slate-500">
+          Sign in to your Slab Trade account.
+        </p>
       </div>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.field}>
-          <label htmlFor="email">Email address</label>
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="email" className="text-xs text-slate-700">
+            Email address
+          </Label>
 
-          <input
+          <Input
             id="email"
             type="email"
             placeholder="john@example.com"
@@ -122,16 +130,19 @@ export default function LoginPage() {
             onChange={(event) => handleChange("email", event.target.value)}
             disabled={loading}
             autoComplete="email"
+            className="h-9"
           />
         </div>
 
-        <div className={styles.field}>
-          <div className={styles.passwordHeader}>
-            <label htmlFor="password">Password</label>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password" className="text-xs text-slate-700">
+              Password
+            </Label>
 
             <button
               type="button"
-              className={styles.forgotButton}
+              className="text-xs text-blue-600 hover:underline"
               onClick={() => {
                 toast.info("Forgot password", {
                   description: "Password recovery will be implemented later.",
@@ -143,33 +154,37 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             placeholder="Enter your password"
             value={formData.password}
             onChange={(event) => handleChange("password", event.target.value)}
             disabled={loading}
             autoComplete="current-password"
+            className="h-9"
           />
         </div>
 
-        {error && <div className={styles.error}>{error}</div>}
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-[13px] leading-relaxed text-red-700">
+            {error}
+          </div>
+        )}
 
-        <button type="submit" className={styles.submit} disabled={loading}>
-          {loading ? (
-            <>
-              <span className={styles.spinner} />
-              Signing in...
-            </>
-          ) : (
-            "Sign in"
-          )}
-        </button>
+        <LoadingButton
+          type="submit"
+          loading={loading}
+          loadingText="Signing in..."
+          className="h-9"
+        >
+          Sign in
+        </LoadingButton>
 
-        <p className={styles.registerText}>
+        <p className="text-center text-[13px] text-slate-500">
           Don&apos;t have an account?{" "}
-          <Link href="/register">Create account</Link>
+          <Link href="/register" className="font-semibold text-blue-600 hover:underline">
+            Create account
+          </Link>
         </p>
       </form>
     </AuthLayout>

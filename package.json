@@ -1,5 +1,5 @@
 {
-  "name": "granite-marketplace",
+  "name": "slab-trade",
   "private": true,
   "scripts": {
     "build": "turbo run build",

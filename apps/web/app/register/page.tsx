@@ -2,12 +2,15 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import AuthLayout from "@/components/auth/AuthLayout";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 import { registerSchema } from "@/lib/validations/auth";
 import { authService } from "@/services/auth.service";
-
-import styles from "./register.module.css";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -42,9 +45,15 @@ export default function RegisterPage() {
     const validation = registerSchema.safeParse(formData);
 
     if (!validation.success) {
-      setError(
-        validation.error.issues[0]?.message ?? "Please check your information.",
-      );
+      const message =
+        validation.error.issues[0]?.message ?? "Please check your information.";
+
+      setError(message);
+
+      toast.error("Invalid registration details", {
+        description: message,
+      });
+
       return;
     }
 
@@ -58,6 +67,10 @@ export default function RegisterPage() {
 
       setSuccess("Account created successfully. You can now sign in.");
 
+      toast.success("Account created", {
+        description: "You can now sign in with your new account.",
+      });
+
       setFormData({
         firstName: "",
         lastName: "",
@@ -67,11 +80,16 @@ export default function RegisterPage() {
         confirmPassword: "",
       });
     } catch (error) {
-      setError(
+      const message =
         error instanceof Error
           ? error.message
-          : "Registration failed. Please try again.",
-      );
+          : "Registration failed. Please try again.";
+
+      setError(message);
+
+      toast.error("Registration failed", {
+        description: message,
+      });
     } finally {
       setLoading(false);
     }
@@ -79,18 +97,27 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout>
-      <div className={styles.header}>
-        <h1>Create your account</h1>
+      <div className="mb-8">
+        <h1 className="text-[32px] leading-tight tracking-[-0.8px] text-slate-900 max-[550px]:text-[27px]">
+          Create your account
+        </h1>
 
-        <p>Join Granite Marketplace and start trading securely.</p>
+        <p className="mt-2.5 text-[15px] leading-relaxed text-slate-500">
+          Join Slab Trade and start trading securely.
+        </p>
       </div>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.row}>
-          <div className={styles.field}>
-            <label htmlFor="firstName">First name</label>
+      <form
+        className="flex flex-col gap-[18px] max-[550px]:gap-[15px]"
+        onSubmit={handleSubmit}
+      >
+        <div className="grid grid-cols-2 gap-3.5 max-[550px]:grid-cols-1">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="firstName" className="text-xs text-slate-700">
+              First name
+            </Label>
 
-            <input
+            <Input
               id="firstName"
               type="text"
               placeholder="John"
@@ -99,109 +126,135 @@ export default function RegisterPage() {
                 handleChange("firstName", event.target.value)
               }
               disabled={loading}
+              className="h-9"
             />
           </div>
 
-          <div className={styles.field}>
-            <label htmlFor="lastName">Last name</label>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="lastName" className="text-xs text-slate-700">
+              Last name
+            </Label>
 
-            <input
+            <Input
               id="lastName"
               type="text"
               placeholder="Doe"
               value={formData.lastName}
               onChange={(event) => handleChange("lastName", event.target.value)}
               disabled={loading}
+              className="h-9"
             />
           </div>
         </div>
 
-        <div className={styles.field}>
-          <label htmlFor="email">Email address</label>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="email" className="text-xs text-slate-700">
+            Email address
+          </Label>
 
-          <input
+          <Input
             id="email"
             type="email"
             placeholder="john@example.com"
             value={formData.email}
             onChange={(event) => handleChange("email", event.target.value)}
             disabled={loading}
+            className="h-9"
           />
         </div>
 
-        <div className={styles.field}>
-          <label htmlFor="phone">
-            Phone number <span className={styles.optional}>Optional</span>
-          </label>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="phone" className="text-xs text-slate-700">
+            Phone number{" "}
+            <span className="font-normal text-slate-400">Optional</span>
+          </Label>
 
-          <input
+          <Input
             id="phone"
             type="tel"
             placeholder="+91 98765 43210"
             value={formData.phone}
             onChange={(event) => handleChange("phone", event.target.value)}
             disabled={loading}
+            className="h-9"
           />
         </div>
 
-        <div className={styles.field}>
-          <label htmlFor="password">Password</label>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="password" className="text-xs text-slate-700">
+            Password
+          </Label>
 
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             placeholder="Minimum 8 characters"
             value={formData.password}
             onChange={(event) => handleChange("password", event.target.value)}
             disabled={loading}
+            className="h-9"
           />
         </div>
 
-        <div className={styles.field}>
-          <label htmlFor="confirmPassword">Confirm password</label>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="confirmPassword" className="text-xs text-slate-700">
+            Confirm password
+          </Label>
 
-          <input
+          <PasswordInput
             id="confirmPassword"
-            type="password"
             placeholder="Enter your password again"
             value={formData.confirmPassword}
             onChange={(event) =>
               handleChange("confirmPassword", event.target.value)
             }
             disabled={loading}
+            className="h-9"
           />
         </div>
 
-        <div className={styles.roleInfo}>
-          <div className={styles.roleIcon}>✓</div>
+        <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3.5">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+            ✓
+          </div>
 
           <div>
-            <strong>Customer account</strong>
+            <strong className="text-[13px] text-blue-900">
+              Customer account
+            </strong>
 
-            <p>
-              New accounts are registered as Customers. Other roles are assigned
-              by administrators.
+            <p className="mt-1 text-xs leading-relaxed text-slate-600">
+              New accounts are registered as Customers. Other roles are
+              assigned by administrators.
             </p>
           </div>
         </div>
 
-        {error && <div className={styles.error}>{error}</div>}
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-[13px] leading-relaxed text-red-700">
+            {error}
+          </div>
+        )}
 
-        {success && <div className={styles.success}>{success}</div>}
+        {success && (
+          <div className="rounded-lg border border-green-200 bg-green-50 px-3.5 py-3 text-[13px] leading-relaxed text-green-700">
+            {success}
+          </div>
+        )}
 
-        <button type="submit" className={styles.submit} disabled={loading}>
-          {loading ? (
-            <>
-              <span className={styles.spinner} />
-              Creating account...
-            </>
-          ) : (
-            "Create account"
-          )}
-        </button>
+        <LoadingButton
+          type="submit"
+          loading={loading}
+          loadingText="Creating account..."
+          className="h-9"
+        >
+          Create account
+        </LoadingButton>
 
-        <p className={styles.loginText}>
-          Already have an account? <Link href="/login">Sign in</Link>
+        <p className="text-center text-[13px] text-slate-500">
+          Already have an account?{" "}
+          <Link href="/login" className="font-semibold text-blue-600 hover:underline">
+            Sign in
+          </Link>
         </p>
       </form>
     </AuthLayout>
