@@ -9,15 +9,15 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <main className="grid min-h-screen grid-cols-2 bg-slate-50 max-[900px]:grid-cols-1">
-      <section className="relative flex flex-col justify-between overflow-hidden bg-slate-900 p-12 text-white max-[900px]:min-h-[360px] max-[900px]:p-8 max-[500px]:min-h-[320px] max-[500px]:p-6">
+    <main className="grid min-h-screen grid-cols-2 bg-[#f3f7f8] [--primary:#0d5c63] [--primary-foreground:#ffffff] [--ring:#0d5c63] max-[900px]:grid-cols-1">
+      <section className="relative flex flex-col justify-between overflow-hidden bg-[#083b40] p-12 text-white max-[900px]:min-h-[360px] max-[900px]:p-8 max-[500px]:min-h-[320px] max-[500px]:p-6">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-[180px] -right-[180px] size-[500px] rounded-full bg-blue-500/15 blur-3xl"
+          className="pointer-events-none absolute -top-[180px] -right-[180px] size-[500px] rounded-full bg-[#6fc4bf]/15 blur-3xl"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -bottom-[180px] -left-[180px] size-[400px] rounded-full bg-sky-500/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-[180px] -left-[180px] size-[400px] rounded-full bg-[#0d5c63]/20 blur-3xl"
         />
 
         <div className="relative z-10">
@@ -32,7 +32,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </div>
 
         <Reveal className="relative z-10 max-w-[520px]">
-          <p className="mb-5 text-xs font-semibold tracking-[2px] text-blue-400">
+          <p className="mb-5 text-xs font-semibold tracking-[2px] text-[#6fc4bf]">
             SLAB TRADE
           </p>
 
@@ -42,30 +42,30 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             Build better.
           </h2>
 
-          <p className="my-7 max-w-[460px] text-[17px] leading-relaxed text-slate-300 max-[500px]:text-[15px]">
+          <p className="my-7 max-w-[460px] text-[17px] leading-relaxed text-white/70 max-[500px]:text-[15px]">
             A secure marketplace built for modern businesses, sellers, and
             customers.
           </p>
 
           <div className="flex flex-col gap-3.5 max-[500px]:gap-2.5">
-            <div className="flex items-center gap-2.5 text-sm text-slate-200">
-              <span className="font-bold text-blue-400">✓</span>
+            <div className="flex items-center gap-2.5 text-sm text-white/85">
+              <span className="font-bold text-[#6fc4bf]">✓</span>
               Secure authentication
             </div>
 
-            <div className="flex items-center gap-2.5 text-sm text-slate-200">
-              <span className="font-bold text-blue-400">✓</span>
+            <div className="flex items-center gap-2.5 text-sm text-white/85">
+              <span className="font-bold text-[#6fc4bf]">✓</span>
               Trusted marketplace
             </div>
 
-            <div className="flex items-center gap-2.5 text-sm text-slate-200">
-              <span className="font-bold text-blue-400">✓</span>
+            <div className="flex items-center gap-2.5 text-sm text-white/85">
+              <span className="font-bold text-[#6fc4bf]">✓</span>
               Simple and secure trading
             </div>
           </div>
         </Reveal>
 
-        <p className="relative z-10 text-xs text-slate-500 max-[900px]:hidden">
+        <p className="relative z-10 text-xs text-white/40 max-[900px]:hidden">
           © 2026 Slab Trade
         </p>
       </section>

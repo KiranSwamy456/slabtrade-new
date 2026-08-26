@@ -142,7 +142,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              className="text-xs text-blue-600 hover:underline"
+              className="text-xs text-[#0d5c63] hover:underline"
               onClick={() => {
                 toast.info("Forgot password", {
                   description: "Password recovery will be implemented later.",
@@ -182,7 +182,7 @@ export default function LoginPage() {
 
         <p className="text-center text-[13px] text-slate-500">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-semibold text-blue-600 hover:underline">
+          <Link href="/register" className="font-semibold text-[#0d5c63] hover:underline">
             Create account
           </Link>
         </p>

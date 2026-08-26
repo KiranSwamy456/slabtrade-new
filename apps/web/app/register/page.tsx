@@ -212,13 +212,13 @@ export default function RegisterPage() {
           />
         </div>
 
-        <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3.5">
-          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+        <div className="flex gap-3 rounded-lg border border-[#c5d8dc] bg-[#e7f5f4] p-3.5">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#0d5c63] text-xs font-bold text-white">
             ✓
           </div>
 
           <div>
-            <strong className="text-[13px] text-blue-900">
+            <strong className="text-[13px] text-[#0d5c63]">
               Customer account
             </strong>
 
@@ -252,7 +252,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-[13px] text-slate-500">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-blue-600 hover:underline">
+          <Link href="/login" className="font-semibold text-[#0d5c63] hover:underline">
             Sign in
           </Link>
         </p>
