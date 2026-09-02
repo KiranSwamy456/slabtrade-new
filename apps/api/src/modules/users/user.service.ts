@@ -13,7 +13,7 @@ export class UserService {
   async getUsers() {
     const users = await this.userRepository.findAll();
 
-    return users.map((user) => ({
+   return users.map((user: any) => ({
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
