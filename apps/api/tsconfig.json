@@ -28,7 +28,7 @@
 
     "baseUrl": "./src",
 
-   "paths": {
+  "paths": {
   "@/*": ["*"],
 
   "@bootstrap": ["bootstrap/index.ts"],
@@ -36,12 +36,6 @@
 
   "@config": ["config/index.ts"],
   "@config/*": ["config/*"],
-
-  "@common/errors": ["common/errors/index.ts"],
-  "@common/logger": ["common/logger/index.ts"],
-  "@common/middlewares": ["common/middlewares/index.ts"],
-  "@common/responses": ["common/responses/index.ts"],
-  "@common/utils": ["common/utils/index.ts"],
 
   "@common/*": ["common/*"],
 
