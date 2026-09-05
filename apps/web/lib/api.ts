@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 type ApiRequestOptions = RequestInit & {
   token?: string;
@@ -12,7 +13,13 @@ export async function apiRequest<T>(
 
   const headers = new Headers(fetchOptions.headers);
 
-  headers.set("Content-Type", "application/json");
+  /*
+   * Let the browser set the multipart boundary itself when the body
+   * is FormData — manually setting Content-Type here would omit it.
+   */
+  if (!(fetchOptions.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
 
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);

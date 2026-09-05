@@ -28,6 +28,7 @@ model User {
   role   Role?   @relation(fields: [roleId], references: [id])
 
   refreshTokens RefreshToken[]
+  slabListings  SlabListing[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -70,4 +71,38 @@ model RefreshToken {
   @@index([userId])
   @@index([familyId])
   @@map("refresh_tokens")
+}
+
+model SlabListing {
+  id String @id @default(uuid())
+
+  vendorId String
+  vendor   User   @relation(fields: [vendorId], references: [id])
+
+  materialName String
+
+  thickness        String // "2cm" | "3cm"
+  slabsPerLot      Int
+  lotsPerContainer Int    @default(7)
+
+  lengthMin Float
+  lengthMax Float
+  widthMin  Float
+  widthMax  Float
+
+  unitPrice Decimal @db.Decimal(10, 2)
+
+  colorCategory String // "Dark" | "Light" | "White"
+  veinPattern   String // "Long" | "Short"
+
+  images String[] @default([])
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([vendorId])
+  @@map("slab_listings")
 }

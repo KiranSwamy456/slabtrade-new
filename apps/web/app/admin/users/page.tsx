@@ -26,6 +26,10 @@ export default function AdminUsersPage() {
     const accessToken = authStorage.getAccessToken();
 
     if (!accessToken) {
+      toast.error("Authentication required", {
+        description: "Please sign in again.",
+      });
+      setLoading(false);
       return;
     }
 

@@ -6,7 +6,7 @@ const USER_KEY = "slabtrade_user";
 
 export const authStorage = {
   setAuth(data: { accessToken: string; refreshToken: string; user: User }) {
-    sessionStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
+    localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
 
     localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
 
@@ -14,7 +14,7 @@ export const authStorage = {
   },
 
   getAccessToken() {
-    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
   },
 
   getRefreshToken() {
@@ -36,7 +36,7 @@ export const authStorage = {
   },
 
   clear() {
-    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
 
     localStorage.removeItem(REFRESH_TOKEN_KEY);
 
