@@ -2,7 +2,7 @@
   "name": "slab-trade",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
+     "build": "tsc && tsc-alias",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
