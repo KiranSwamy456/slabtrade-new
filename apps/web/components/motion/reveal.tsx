@@ -1,6 +1,6 @@
 "use client";
 
-import type { ElementType, ReactNode } from "react";
+import { useMemo, type ElementType, type ReactNode } from "react";
 import { motion, type Variants } from "motion/react";
 
 const fadeUp: Variants = {
@@ -20,7 +20,7 @@ interface RevealProps {
 }
 
 export function Reveal({ children, className, delay = 0, as = "div" }: RevealProps) {
-  const Comp = motion.create(as);
+  const Comp = useMemo(() => motion.create(as), [as]);
 
   return (
     <Comp

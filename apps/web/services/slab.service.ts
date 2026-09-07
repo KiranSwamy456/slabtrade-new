@@ -14,12 +14,15 @@ export type CreateSlabListingRequest = {
   images?: File[];
 };
 
+/** 1 = active (visible to buyers), 0 = inactive */
+export type SlabStatus = 0 | 1;
+
 export type SlabListing = Omit<CreateSlabListingRequest, "images"> & {
   id: string;
   vendorId: string;
   lotsPerContainer: number;
   images: string[];
-  isActive: boolean;
+  status: SlabStatus;
   createdAt: string;
 };
 
@@ -33,6 +36,12 @@ export type ListSlabListingsResponse = {
   success: boolean;
   message: string;
   data: SlabListing[];
+};
+
+export type UpdateSlabStatusResponse = {
+  success: boolean;
+  message: string;
+  data: SlabListing;
 };
 
 export const slabService = {
@@ -65,6 +74,18 @@ export const slabService = {
     return apiRequest<ListSlabListingsResponse>("/slabs", {
       method: "GET",
       token: accessToken,
+    });
+  },
+
+  async updateSlabStatus(
+    id: string,
+    status: SlabStatus,
+    accessToken: string,
+  ): Promise<UpdateSlabStatusResponse> {
+    return apiRequest<UpdateSlabStatusResponse>(`/slabs/${id}/status`, {
+      method: "PATCH",
+      token: accessToken,
+      body: JSON.stringify({ status }),
     });
   },
 };

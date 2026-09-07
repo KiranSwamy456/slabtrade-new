@@ -76,4 +76,40 @@ export class SlabController {
       next(error);
     }
   };
+
+  updateListingStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const vendorId = req.user?.userId;
+
+      if (!vendorId) {
+        res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+
+        return;
+      }
+
+      const listing = await this.slabService.setListingStatus(
+        vendorId,
+        req.params.id as string,
+        req.body.status,
+      );
+
+      res.status(200).json({
+        success: true,
+        message:
+          listing.status === 1
+            ? "Slab listing activated"
+            : "Slab listing deactivated",
+        data: listing,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

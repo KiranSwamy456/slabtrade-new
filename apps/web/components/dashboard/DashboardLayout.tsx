@@ -29,7 +29,7 @@ export function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="dashboard-canvas flex min-h-screen items-center justify-center">
         <div className="w-full max-w-sm space-y-3 px-6">
           <Skeleton className="h-8 w-2/3" />
           <Skeleton className="h-4 w-full" />
@@ -50,13 +50,13 @@ export function DashboardLayout({
       <AppSidebar navItems={navItems} user={user} />
 
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-white px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-4 shadow-sm">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-sm font-semibold text-slate-900">{title}</h1>
         </header>
 
-        <div className="flex-1 bg-slate-50 p-6">{children}</div>
+        <div className="dashboard-canvas flex-1 p-6">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

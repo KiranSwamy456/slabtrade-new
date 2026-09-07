@@ -20,23 +20,23 @@ export const createSlabListingSchema = z
 
     lengthMin: z
       .number({ message: "Length min is required" })
-      .min(100, "Length must be at least 100 cm")
-      .max(140, "Length must be at most 140 cm"),
+      .min(100, "Length must be at least 100 inches")
+      .max(140, "Length must be at most 140 inches"),
 
     lengthMax: z
       .number({ message: "Length max is required" })
-      .min(100, "Length must be at least 100 cm")
-      .max(140, "Length must be at most 140 cm"),
+      .min(100, "Length must be at least 100 inches")
+      .max(140, "Length must be at most 140 inches"),
 
     widthMin: z
       .number({ message: "Width min is required" })
-      .min(57, "Width must be at least 57 cm")
-      .max(85, "Width must be at most 85 cm"),
+      .min(57, "Width must be at least 57 inches")
+      .max(85, "Width must be at most 85 inches"),
 
     widthMax: z
       .number({ message: "Width max is required" })
-      .min(57, "Width must be at least 57 cm")
-      .max(85, "Width must be at most 85 cm"),
+      .min(57, "Width must be at least 57 inches")
+      .max(85, "Width must be at most 85 inches"),
 
     unitPrice: z
       .number({ message: "Unit price is required" })

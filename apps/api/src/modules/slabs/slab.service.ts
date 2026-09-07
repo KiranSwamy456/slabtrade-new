@@ -1,5 +1,7 @@
 import { SlabListing } from "@prisma/client";
 
+import { NotFoundError } from "@common/errors/NotFoundError";
+
 import { SlabRepository } from "./slab.repository";
 import type { CreateSlabListingInput } from "./slab.schema";
 
@@ -30,6 +32,18 @@ export class SlabService {
     return listings.map((listing) => this.toListingResponse(listing));
   }
 
+  async setListingStatus(vendorId: string, id: string, status: number) {
+    const listing = await this.slabRepository.findByIdForVendor(id, vendorId);
+
+    if (!listing) {
+      throw new NotFoundError("Slab listing not found");
+    }
+
+    const updated = await this.slabRepository.updateStatus(id, status);
+
+    return this.toListingResponse(updated);
+  }
+
   private toListingResponse(listing: SlabListing) {
     return {
       id: listing.id,
@@ -46,7 +60,7 @@ export class SlabService {
       colorCategory: listing.colorCategory,
       veinPattern: listing.veinPattern,
       images: listing.images,
-      isActive: listing.isActive,
+      status: listing.status,
       createdAt: listing.createdAt,
     };
   }

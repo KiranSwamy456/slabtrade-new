@@ -20,23 +20,23 @@ export const createSlabListingSchema = z
 
     lengthMin: z.coerce
       .number()
-      .min(100, "Length must be at least 100 cm")
-      .max(140, "Length must be at most 140 cm"),
+      .min(100, "Length must be at least 100 inches")
+      .max(140, "Length must be at most 140 inches"),
 
     lengthMax: z.coerce
       .number()
-      .min(100, "Length must be at least 100 cm")
-      .max(140, "Length must be at most 140 cm"),
+      .min(100, "Length must be at least 100 inches")
+      .max(140, "Length must be at most 140 inches"),
 
     widthMin: z.coerce
       .number()
-      .min(57, "Width must be at least 57 cm")
-      .max(85, "Width must be at most 85 cm"),
+      .min(57, "Width must be at least 57 inches")
+      .max(85, "Width must be at most 85 inches"),
 
     widthMax: z.coerce
       .number()
-      .min(57, "Width must be at least 57 cm")
-      .max(85, "Width must be at most 85 cm"),
+      .min(57, "Width must be at least 57 inches")
+      .max(85, "Width must be at most 85 inches"),
 
     unitPrice: z.coerce.number().positive("Unit price must be greater than 0"),
 
@@ -65,3 +65,14 @@ export const createSlabListingSchema = z
   });
 
 export type CreateSlabListingInput = z.infer<typeof createSlabListingSchema>;
+
+export const updateSlabStatusSchema = z.object({
+  status: z.coerce
+    .number()
+    .int()
+    .refine((value) => value === 0 || value === 1, {
+      message: "Status must be 1 (active) or 0 (inactive)",
+    }),
+});
+
+export type UpdateSlabStatusInput = z.infer<typeof updateSlabStatusSchema>;

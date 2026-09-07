@@ -97,7 +97,8 @@ model SlabListing {
 
   images String[] @default([])
 
-  isActive Boolean @default(true)
+  // 1 = active (visible to buyers), 0 = inactive
+  status Int @default(1)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

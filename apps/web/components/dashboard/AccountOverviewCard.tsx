@@ -31,9 +31,13 @@ const ROLE_COLOR_STYLES = {
 
 interface AccountOverviewCardProps {
   user: User;
+  className?: string;
 }
 
-export function AccountOverviewCard({ user }: AccountOverviewCardProps) {
+export function AccountOverviewCard({
+  user,
+  className,
+}: AccountOverviewCardProps) {
   const roleKey = (user.role?.name?.toLowerCase() ??
     "customer") as keyof typeof ROLE_COLOR_STYLES;
   const styles = ROLE_COLOR_STYLES[roleKey] ?? ROLE_COLOR_STYLES.customer;
@@ -43,7 +47,12 @@ export function AccountOverviewCard({ user }: AccountOverviewCardProps) {
     "?";
 
   return (
-    <Card className="relative gap-3 overflow-hidden pt-5">
+    <Card
+      className={cn(
+        "relative gap-3 overflow-hidden border border-slate-200 pt-5 shadow-sm ring-0",
+        className,
+      )}
+    >
       <div className={cn("absolute inset-x-0 top-0 h-1", styles.bar)} />
 
       <CardHeader>

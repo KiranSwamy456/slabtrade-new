@@ -7,8 +7,11 @@ import {
   ChevronRight,
   ImageOff,
   Layers,
+  Loader2,
   Package,
   Plus,
+  Power,
+  PowerOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,11 +19,27 @@ import { toast } from "sonner";
 
 import { useAuthGuard } from "@/lib/auth/auth-guard";
 import { authStorage } from "@/lib/auth/auth-storage";
-import { slabService, getSlabImageUrl, type SlabListing } from "@/services/slab.service";
+import {
+  slabService,
+  getSlabImageUrl,
+  type SlabListing,
+  type SlabStatus,
+} from "@/services/slab.service";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 const COLOR_BADGE_STYLES: Record<SlabListing["colorCategory"], string> = {
@@ -35,6 +54,16 @@ function formatDate(value: string): string {
     month: "short",
     day: "numeric",
   });
+}
+
+/** Area range of one slab face in square feet, from inch dimensions. */
+function formatSquareFeetRange(listing: SlabListing): string {
+  const min = (listing.lengthMin * listing.widthMin) / 144;
+  const max = (listing.lengthMax * listing.widthMax) / 144;
+
+  return min.toFixed(1) === max.toFixed(1)
+    ? min.toFixed(1)
+    : `${min.toFixed(1)}–${max.toFixed(1)}`;
 }
 
 function SlabCardSkeleton() {
@@ -137,7 +166,31 @@ function SlabImageCarousel({
   );
 }
 
-function SlabListingCard({ listing }: { listing: SlabListing }) {
+function SlabListingCard({
+  listing,
+  onToggleStatus,
+}: {
+  listing: SlabListing;
+  onToggleStatus: (listing: SlabListing) => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const isActive = listing.status === 1;
+  const actionLabel = isActive ? "Deactivate" : "Activate";
+
+  const handleConfirm = async () => {
+    setBusy(true);
+    try {
+      await onToggleStatus(listing);
+      setOpen(false);
+    } catch {
+      /* error is surfaced via toast by the page handler; keep the dialog open */
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <Card className="group w-full gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-0 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-0">
       <div className="relative aspect-square w-full shrink-0 bg-slate-100">
@@ -147,12 +200,12 @@ function SlabListingCard({ listing }: { listing: SlabListing }) {
           variant="outline"
           className={cn(
             "absolute top-1.5 left-1.5 shadow-sm",
-            listing.isActive
+            isActive
               ? "bg-green-50 text-green-700 ring-1 ring-green-200"
               : "bg-white/90 text-slate-700 ring-1 ring-slate-200",
           )}
         >
-          {listing.isActive ? "Active" : "Inactive"}
+          {isActive ? "Active" : "Inactive"}
         </Badge>
       </div>
 
@@ -188,9 +241,13 @@ function SlabListingCard({ listing }: { listing: SlabListing }) {
           </span>
           <span className="truncate">
             {listing.lengthMin}–{listing.lengthMax} × {listing.widthMin}–
-            {listing.widthMax} cm
+            {listing.widthMax} in
           </span>
         </div>
+
+        <p className="text-[11px] text-slate-400">
+          {formatSquareFeetRange(listing)} sq ft / slab
+        </p>
 
         <p className="text-sm font-semibold text-slate-900">
           ${listing.unitPrice.toFixed(2)}
@@ -198,6 +255,54 @@ function SlabListingCard({ listing }: { listing: SlabListing }) {
             / slab
           </span>
         </p>
+
+        <AlertDialog open={open} onOpenChange={setOpen}>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant={isActive ? "outline" : "default"}
+              size="sm"
+              className="mt-1 w-full"
+            >
+              {isActive ? (
+                <PowerOff className="size-3.5" />
+              ) : (
+                <Power className="size-3.5" />
+              )}
+              {actionLabel}
+            </Button>
+          </AlertDialogTrigger>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {actionLabel} this slab?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {isActive
+                  ? `Are you sure you want to deactivate "${listing.materialName}"? Buyers will no longer see this lot until you activate it again.`
+                  : `Are you sure you want to activate "${listing.materialName}"? It will become visible to buyers right away.`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleConfirm();
+                }}
+                disabled={busy}
+                className={cn(
+                  isActive &&
+                    "bg-red-600 text-white hover:bg-red-600/90",
+                )}
+              >
+                {busy && <Loader2 className="size-3.5 animate-spin" />}
+                Yes, {actionLabel.toLowerCase()}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Card>
   );
@@ -235,6 +340,44 @@ export default function MySlabsPage() {
       })
       .finally(() => setLoading(false));
   }, [user]);
+
+  const handleToggleStatus = async (listing: SlabListing) => {
+    const accessToken = authStorage.getAccessToken();
+
+    if (!accessToken) {
+      toast.error("Authentication required", {
+        description: "Please sign in again.",
+      });
+      return;
+    }
+
+    const nextStatus: SlabStatus = listing.status === 1 ? 0 : 1;
+
+    try {
+      const response = await slabService.updateSlabStatus(
+        listing.id,
+        nextStatus,
+        accessToken,
+      );
+
+      setListings((previous) =>
+        previous.map((item) =>
+          item.id === listing.id ? response.data : item,
+        ),
+      );
+
+      toast.success(
+        nextStatus === 1 ? "Slab activated" : "Slab deactivated",
+        { description: listing.materialName },
+      );
+    } catch (error) {
+      toast.error("Failed to update status", {
+        description:
+          error instanceof Error ? error.message : "Something went wrong.",
+      });
+      throw error;
+    }
+  };
 
   if (!user) {
     return null;
@@ -285,7 +428,11 @@ export default function MySlabsPage() {
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {listings.map((listing) => (
-            <SlabListingCard key={listing.id} listing={listing} />
+            <SlabListingCard
+              key={listing.id}
+              listing={listing}
+              onToggleStatus={handleToggleStatus}
+            />
           ))}
         </div>
       )}

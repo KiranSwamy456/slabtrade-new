@@ -37,4 +37,21 @@ export class SlabRepository {
       },
     });
   }
+
+  async findByIdForVendor(id: string, vendorId: string) {
+    return prisma.slabListing.findFirst({
+      where: {
+        id,
+        vendorId,
+        deletedAt: null,
+      },
+    });
+  }
+
+  async updateStatus(id: string, status: number) {
+    return prisma.slabListing.update({
+      where: { id },
+      data: { status },
+    });
+  }
 }

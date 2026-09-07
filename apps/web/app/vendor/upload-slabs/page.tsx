@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ImagePlus, Package, X } from "lucide-react";
+import { ImagePlus, Package, Ruler, X } from "lucide-react";
 import { toast } from "sonner";
 
 /* eslint-disable @next/next/no-img-element -- local blob: preview URLs aren't supported by next/image */
@@ -32,7 +32,7 @@ type SlabFormData = {
 
 const INITIAL_FORM_DATA: SlabFormData = {
   materialName: "",
-  thickness: "2cm",
+  thickness: "3cm",
   slabsPerLot: "",
   lengthMin: "",
   lengthMax: "",
@@ -76,6 +76,22 @@ function toNumber(value: string): number | undefined {
   const parsed = Number(value);
 
   return Number.isNaN(parsed) ? undefined : parsed;
+}
+
+const SQ_INCHES_PER_SQ_FOOT = 144;
+
+/** Area of one slab face in square feet, from inch dimensions. */
+function squareFeet(lengthIn?: number, widthIn?: number): number | undefined {
+  if (
+    lengthIn === undefined ||
+    widthIn === undefined ||
+    lengthIn <= 0 ||
+    widthIn <= 0
+  ) {
+    return undefined;
+  }
+
+  return (lengthIn * widthIn) / SQ_INCHES_PER_SQ_FOOT;
 }
 
 export default function UploadSlabsPage() {
@@ -272,6 +288,15 @@ export default function UploadSlabsPage() {
 
   const slabsPerLotRange = SLABS_PER_LOT_RANGE[formData.thickness];
 
+  const areaMin = squareFeet(
+    toNumber(formData.lengthMin),
+    toNumber(formData.widthMin),
+  );
+  const areaMax = squareFeet(
+    toNumber(formData.lengthMax),
+    toNumber(formData.widthMax),
+  );
+
   return (
     <div className="space-y-6">
       <div>
@@ -459,17 +484,18 @@ export default function UploadSlabsPage() {
           <section className="border-b border-slate-200 p-5 px-6 max-[700px]:p-4">
             <div className="mb-3.5">
               <h2 className="text-lg font-semibold text-slate-900">
-                Slab dimensions (cm)
+                Slab dimensions (inches)
               </h2>
               <p className="mt-[5px] text-sm text-slate-500">
-                Slabs in a lot naturally vary in size — enter the range.
+                Slabs in a lot naturally vary in size — enter the range in
+                inches. Area is shown in square feet.
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 max-[700px]:grid-cols-1">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="lengthMin" className="text-xs text-slate-700">
-                  Length min (cm) <span className="text-red-500">*</span>
+                  Length min (inches) <span className="text-red-500">*</span>
                 </Label>
 
                 <Input
@@ -493,7 +519,7 @@ export default function UploadSlabsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="lengthMax" className="text-xs text-slate-700">
-                  Length max (cm) <span className="text-red-500">*</span>
+                  Length max (inches) <span className="text-red-500">*</span>
                 </Label>
 
                 <Input
@@ -517,13 +543,13 @@ export default function UploadSlabsPage() {
             </div>
 
             <p className="mt-1.5 text-xs text-slate-500">
-              Valid range: 100–140 cm.
+              Valid range: 100–140 inches.
             </p>
 
             <div className="mt-4 grid grid-cols-2 gap-4 max-[700px]:grid-cols-1">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="widthMin" className="text-xs text-slate-700">
-                  Width min (cm) <span className="text-red-500">*</span>
+                  Width min (inches) <span className="text-red-500">*</span>
                 </Label>
 
                 <Input
@@ -547,7 +573,7 @@ export default function UploadSlabsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="widthMax" className="text-xs text-slate-700">
-                  Width max (cm) <span className="text-red-500">*</span>
+                  Width max (inches) <span className="text-red-500">*</span>
                 </Label>
 
                 <Input
@@ -571,8 +597,21 @@ export default function UploadSlabsPage() {
             </div>
 
             <p className="mt-1.5 text-xs text-slate-500">
-              Valid range: 57–85 cm.
+              Valid range: 57–85 inches.
             </p>
+
+            {areaMin !== undefined && areaMax !== undefined && (
+              <p className="mt-4 flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                <Ruler className="size-3.5 shrink-0 text-slate-400" />
+                Approx.{" "}
+                <span className="font-medium text-slate-800">
+                  {areaMin.toFixed(1) === areaMax.toFixed(1)
+                    ? `${areaMin.toFixed(1)} sq ft`
+                    : `${areaMin.toFixed(1)}–${areaMax.toFixed(1)} sq ft`}
+                </span>{" "}
+                per slab
+              </p>
+            )}
           </section>
 
           <section className="border-b border-slate-200 p-5 px-6 max-[700px]:p-4">
