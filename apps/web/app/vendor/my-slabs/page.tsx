@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
+  Anchor,
   ChevronLeft,
   ChevronRight,
   ImageOff,
@@ -42,6 +44,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
+const APPROVAL_BADGE_STYLES: Record<SlabListing["approvalStatus"], string> = {
+  Pending: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+  Approved: "bg-green-50 text-green-700 ring-1 ring-green-200",
+  Rejected: "bg-red-50 text-red-700 ring-1 ring-red-200",
+};
+
+const APPROVAL_BADGE_LABELS: Record<SlabListing["approvalStatus"], string> = {
+  Pending: "Pending review",
+  Approved: "Approved",
+  Rejected: "Rejected",
+};
+
 const COLOR_BADGE_STYLES: Record<SlabListing["colorCategory"], string> = {
   Dark: "bg-slate-900/5 text-slate-700",
   Light: "bg-amber-50 text-amber-700",
@@ -70,12 +84,66 @@ function SlabCardSkeleton() {
   return (
     <Card className="w-full gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-0 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-0">
       <Skeleton className="aspect-square w-full rounded-none" />
-      <div className="space-y-2 p-3">
-        <Skeleton className="h-3.5 w-2/3" />
-        <Skeleton className="h-3 w-1/2" />
-        <Skeleton className="h-3 w-1/3" />
+      <div className="space-y-1.5 p-2">
+        <Skeleton className="h-3 w-2/3" />
+        <Skeleton className="h-2.5 w-1/2" />
+        <Skeleton className="h-2.5 w-1/3" />
       </div>
     </Card>
+  );
+}
+
+const ZOOM_PANEL_SIZE = 340;
+const ZOOM_PANEL_GAP = 16;
+const ZOOM_LEVEL = 2.2;
+
+function ZoomPreview({
+  imageUrl,
+  x,
+  y,
+  cursorX,
+  cursorY,
+}: {
+  imageUrl: string;
+  x: number;
+  y: number;
+  cursorX: number;
+  cursorY: number;
+}) {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  let left = cursorX + ZOOM_PANEL_GAP;
+
+  if (left + ZOOM_PANEL_SIZE > window.innerWidth) {
+    left = cursorX - ZOOM_PANEL_SIZE - ZOOM_PANEL_GAP;
+  }
+
+  left = Math.max(8, left);
+
+  const top = Math.min(
+    Math.max(8, cursorY - ZOOM_PANEL_SIZE / 2),
+    window.innerHeight - ZOOM_PANEL_SIZE - 8,
+  );
+
+  return createPortal(
+    <div
+      aria-hidden
+      className="pointer-events-none fixed z-50 hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl sm:block"
+      style={{ left, top, width: ZOOM_PANEL_SIZE, height: ZOOM_PANEL_SIZE }}
+    >
+      <div
+        className="size-full"
+        style={{
+          backgroundImage: `url(${imageUrl})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: `${ZOOM_LEVEL * 100}% ${ZOOM_LEVEL * 100}%`,
+          backgroundPosition: `${x}% ${y}%`,
+        }}
+      />
+    </div>,
+    document.body,
   );
 }
 
@@ -88,6 +156,12 @@ function SlabImageCarousel({
 }) {
   const [index, setIndex] = useState(0);
   const [broken, setBroken] = useState<Record<number, boolean>>({});
+  const [zoom, setZoom] = useState<{
+    x: number;
+    y: number;
+    cursorX: number;
+    cursorY: number;
+  } | null>(null);
 
   const total = images.length;
   const current = images[index];
@@ -95,6 +169,17 @@ function SlabImageCarousel({
 
   const goTo = (next: number) => {
     setIndex((next + total) % total);
+  };
+
+  const handleMouseMove = (event: MouseEvent<HTMLImageElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    setZoom({
+      x: ((event.clientX - rect.left) / rect.width) * 100,
+      y: ((event.clientY - rect.top) / rect.height) * 100,
+      cursorX: event.clientX,
+      cursorY: event.clientY,
+    });
   };
 
   if (total === 0 || showFallback) {
@@ -108,16 +193,30 @@ function SlabImageCarousel({
     );
   }
 
+  const imageUrl = getSlabImageUrl(current);
+
   return (
     <>
       <img
-        src={getSlabImageUrl(current)}
+        src={imageUrl}
         alt={alt}
-        className="size-full object-cover"
+        className="size-full cursor-zoom-in object-cover"
         onError={() =>
           setBroken((previous) => ({ ...previous, [index]: true }))
         }
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setZoom(null)}
       />
+
+      {zoom && (
+        <ZoomPreview
+          imageUrl={imageUrl}
+          x={zoom.x}
+          y={zoom.y}
+          cursorX={zoom.cursorX}
+          cursorY={zoom.cursorY}
+        />
+      )}
 
       {total > 1 && (
         <>
@@ -196,25 +295,37 @@ function SlabListingCard({
       <div className="relative aspect-square w-full shrink-0 bg-slate-100">
         <SlabImageCarousel images={listing.images} alt={listing.materialName} />
 
-        <Badge
-          variant="outline"
-          className={cn(
-            "absolute top-1.5 left-1.5 shadow-sm",
-            isActive
-              ? "bg-green-50 text-green-700 ring-1 ring-green-200"
-              : "bg-white/90 text-slate-700 ring-1 ring-slate-200",
-          )}
-        >
-          {isActive ? "Active" : "Inactive"}
-        </Badge>
+        <div className="absolute top-1.5 left-1.5 flex flex-wrap gap-1">
+          <Badge
+            variant="outline"
+            className={cn(
+              "shadow-sm",
+              isActive
+                ? "bg-green-50 text-green-700 ring-1 ring-green-200"
+                : "bg-white/90 text-slate-700 ring-1 ring-slate-200",
+            )}
+          >
+            {isActive ? "Active" : "Inactive"}
+          </Badge>
+
+          <Badge
+            variant="outline"
+            className={cn(
+              "shadow-sm",
+              APPROVAL_BADGE_STYLES[listing.approvalStatus],
+            )}
+          >
+            {APPROVAL_BADGE_LABELS[listing.approvalStatus]}
+          </Badge>
+        </div>
       </div>
 
-      <div className="space-y-2 p-3">
+      <div className="space-y-1.5 p-2">
         <div>
-          <h3 className="truncate text-sm font-semibold text-slate-900">
+          <h3 className="truncate text-xs font-semibold text-slate-900">
             {listing.materialName}
           </h3>
-          <p className="mt-0.5 text-[11px] text-slate-500">
+          <p className="mt-0.5 truncate text-[10px] text-slate-500">
             Listed {formatDate(listing.createdAt)}
           </p>
         </div>
@@ -222,19 +333,19 @@ function SlabListingCard({
         <div className="flex flex-wrap gap-1">
           <Badge
             variant="outline"
-            className={cn("text-[10px]", COLOR_BADGE_STYLES[listing.colorCategory])}
+            className={cn("text-[9px]", COLOR_BADGE_STYLES[listing.colorCategory])}
           >
             {listing.colorCategory}
           </Badge>
-          <Badge variant="outline" className="text-[10px] text-slate-600">
+          <Badge variant="outline" className="text-[9px] text-slate-600">
             {listing.veinPattern} vein
           </Badge>
-          <Badge variant="outline" className="text-[10px] text-slate-600">
+          <Badge variant="outline" className="text-[9px] text-slate-600">
             {listing.thickness}
           </Badge>
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-2 text-[11px] text-slate-500">
+        <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-1.5 text-[10px] text-slate-500">
           <span className="flex items-center gap-1">
             <Package className="size-3 shrink-0 text-slate-400" />
             {listing.slabsPerLot}/lot
@@ -245,13 +356,18 @@ function SlabListingCard({
           </span>
         </div>
 
-        <p className="text-[11px] text-slate-400">
+        <span className="flex items-center gap-1 text-[10px] text-slate-500">
+          <Anchor className="size-3 shrink-0 text-slate-400" />
+          {listing.portOfLoading}
+        </span>
+
+        <p className="text-[10px] text-slate-400">
           {formatSquareFeetRange(listing)} sq ft / slab
         </p>
 
-        <p className="text-sm font-semibold text-slate-900">
+        <p className="text-xs font-semibold text-slate-900">
           ${listing.unitPrice.toFixed(2)}
-          <span className="ml-1 text-[11px] font-normal text-slate-500">
+          <span className="ml-1 text-[10px] font-normal text-slate-500">
             / slab
           </span>
         </p>
@@ -261,7 +377,7 @@ function SlabListingCard({
             <Button
               variant={isActive ? "outline" : "default"}
               size="sm"
-              className="mt-1 w-full"
+              className="mt-1 h-7 w-full text-xs"
             >
               {isActive ? (
                 <PowerOff className="size-3.5" />
@@ -402,7 +518,7 @@ export default function MySlabsPage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {Array.from({ length: 10 }).map((_, index) => (
             <SlabCardSkeleton key={index} />
           ))}
@@ -426,7 +542,7 @@ export default function MySlabsPage() {
           </Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {listings.map((listing) => (
             <SlabListingCard
               key={listing.id}

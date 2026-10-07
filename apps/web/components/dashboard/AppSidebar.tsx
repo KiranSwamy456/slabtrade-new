@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -18,6 +18,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -52,6 +53,7 @@ function getInitials(user: User) {
 export function AppSidebar({ navItems, user }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { isMobile } = useSidebar();
 
   /*
    * Pick the single most specific nav item whose url matches the current
@@ -139,13 +141,15 @@ export function AppSidebar({ navItems, user }: AppSidebarProps) {
                   {user.email}
                 </span>
               </div>
+              <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent
-            side="top"
-            align="start"
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
+            side={isMobile ? "bottom" : "right"}
+            align="end"
+            sideOffset={4}
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm">

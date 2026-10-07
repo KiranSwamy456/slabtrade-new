@@ -29,6 +29,8 @@ model User {
 
   refreshTokens RefreshToken[]
   slabListings  SlabListing[]
+  orders        Order[]
+  orderItems    OrderItem[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -95,10 +97,19 @@ model SlabListing {
   colorCategory String // "Dark" | "Light" | "White"
   veinPattern   String // "Long" | "Short"
 
+  portOfLoading String // "Mundra" | "Kandla" | "Nhava Sheva (JNPT)" | "Chennai" | "Kolkata"
+
   images String[] @default([])
 
   // 1 = active (visible to buyers), 0 = inactive
   status Int @default(1)
+
+  // "Pending" | "Approved" | "Rejected"
+  approvalStatus String    @default("Pending")
+  customerPrice  Decimal?  @db.Decimal(10, 2)
+  approvedAt     DateTime?
+
+  orderItems OrderItem[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -106,4 +117,61 @@ model SlabListing {
 
   @@index([vendorId])
   @@map("slab_listings")
+}
+
+model Order {
+  id          String @id @default(uuid())
+  orderNumber String @unique
+
+  customerId String
+  customer   User   @relation(fields: [customerId], references: [id])
+
+  // Pending | Confirmed | Shipped | Delivered | Cancelled
+  status        String @default("Pending")
+  paymentMethod String @default("COD")
+
+  subtotal    Decimal @db.Decimal(10, 2)
+  totalAmount Decimal @db.Decimal(10, 2)
+
+  shippingName         String
+  shippingPhone        String
+  shippingAddressLine1 String
+  shippingAddressLine2 String?
+  shippingCity         String
+  shippingState        String
+  shippingPostalCode   String
+  shippingCountry      String
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id String @id @default(uuid())
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  slabListingId String
+  slabListing   SlabListing @relation(fields: [slabListingId], references: [id])
+
+  vendorId String
+  vendor   User   @relation(fields: [vendorId], references: [id])
+
+  // Snapshots at time of order, so later price/name edits don't rewrite history.
+  materialName String
+  unitPrice    Decimal @db.Decimal(10, 2)
+  quantity     Int
+  lineTotal    Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([vendorId])
+  @@map("order_items")
 }

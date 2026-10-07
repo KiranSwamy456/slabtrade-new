@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight, MapPin, Sparkles } from "lucide-react";
@@ -12,6 +12,7 @@ import { OptimizedImage, RevealImage, SIZE_PRESETS } from "@/components/site/Opt
 import { enquireHref, getProductBySlug, products, productHref } from "@/lib/products";
 
 const ease = [0.22, 1, 0.36, 1] as const;
+const MAGNIFIER_ZOOM = 2.5;
 
 export default function ProductDetailPage() {
   const params = useParams<{ slug: string | string[] }>();
@@ -19,12 +20,26 @@ export default function ProductDetailPage() {
   const product = getProductBySlug(slug);
   const reduceMotion = useReducedMotion();
   const [activeImage, setActiveImage] = useState(0);
+  const [magnifier, setMagnifier] = useState<{ x: number; y: number } | null>(
+    null,
+  );
 
   if (!product) {
     notFound();
   }
 
   const gallery = product.gallery?.length ? product.gallery : [product.image];
+  const activeImageSrc = gallery[activeImage]!;
+
+  const handleMagnifierMove = (event: MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    setMagnifier({
+      x: ((event.clientX - rect.left) / rect.width) * 100,
+      y: ((event.clientY - rect.top) / rect.height) * 100,
+    });
+  };
+
   const related = products
     .filter((item) => item.slug !== product.slug && (item.origin === product.origin || item.type === product.type))
     .slice(0, 3);
@@ -58,16 +73,33 @@ export default function ProductDetailPage() {
         <section className="mx-auto grid max-w-[1440px] gap-10 px-5 pb-16 sm:gap-12 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:gap-14 lg:px-16 lg:pb-24">
           <motion.div {...fadeUp(0.05)}>
             <div className="surface-card relative overflow-hidden bg-[#d2ecea]">
-              <div className="relative aspect-[4/5] sm:aspect-[.9]">
+              <div
+                className="relative aspect-[4/5] cursor-zoom-in sm:aspect-[.9]"
+                onMouseMove={handleMagnifierMove}
+                onMouseLeave={() => setMagnifier(null)}
+              >
                 <RevealImage
-                  key={gallery[activeImage]}
-                  src={gallery[activeImage]!}
+                  key={activeImageSrc}
+                  src={activeImageSrc}
                   alt={`${product.name} view ${activeImage + 1}`}
                   sizes={SIZE_PRESETS.detail}
                   priority
                   zoomOnHover={false}
                   quality={82}
                 />
+
+                {magnifier && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 hidden ring-2 ring-inset ring-white/80 sm:block"
+                    style={{
+                      backgroundImage: `url(${activeImageSrc})`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: `${MAGNIFIER_ZOOM * 100}% ${MAGNIFIER_ZOOM * 100}%`,
+                      backgroundPosition: `${magnifier.x}% ${magnifier.y}%`,
+                    }}
+                  />
+                )}
               </div>
             </div>
             {gallery.length > 1 ? (

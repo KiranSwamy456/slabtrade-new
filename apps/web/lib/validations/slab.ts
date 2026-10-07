@@ -5,6 +5,19 @@ const THICKNESS_RANGES: Record<"2cm" | "3cm", [number, number]> = {
   "3cm": [5, 8],
 };
 
+export const PORT_OF_LOADING_OPTIONS = [
+  "Mundra",
+  "Kandla",
+  "Nhava Sheva (JNPT)",
+  "Chennai",
+  "Kolkata",
+  "Savannah",
+  "Houston",
+  "Baltimore",
+  "New York/New Jersey",
+  "Long Beach",
+] as const;
+
 export const createSlabListingSchema = z
   .object({
     materialName: z
@@ -45,6 +58,10 @@ export const createSlabListingSchema = z
     colorCategory: z.enum(["Dark", "Light", "White"]),
 
     veinPattern: z.enum(["Long", "Short"]),
+
+    portOfLoading: z.enum(PORT_OF_LOADING_OPTIONS, {
+      message: "Port of loading is required",
+    }),
   })
   .refine((data) => data.lengthMin <= data.lengthMax, {
     message: "Length max must be greater than or equal to length min",

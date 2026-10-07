@@ -5,6 +5,7 @@ import { healthRoutes } from "@modules/health";
 import authRoutes from "@modules/auth/auth.routes";
 import userRoutes from "@modules/users/user.routes";
 import slabRoutes from "@modules/slabs/slab.routes";
+import orderRoutes from "@modules/orders/order.routes";
 
 export const registerRoutes = (app: Express): void => {
   app.use("/health", healthRoutes);
@@ -14,6 +15,8 @@ export const registerRoutes = (app: Express): void => {
   app.use("/users", userRoutes);
 
   app.use("/slabs", slabRoutes);
+
+  app.use("/orders", orderRoutes);
 
   app.use(
     "/uploads",

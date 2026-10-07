@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -242,12 +243,18 @@ export function UsersDataTable({
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit?.(user)}>
+                <DropdownMenuItem
+                  className="text-xs"
+                  onClick={() => onEdit?.(user)}
+                >
                   <Pencil />
                   Edit
                 </DropdownMenuItem>
 
-                <DropdownMenuItem onClick={() => onToggleStatus?.(user)}>
+                <DropdownMenuItem
+                  className="text-xs"
+                  onClick={() => onToggleStatus?.(user)}
+                >
                   {user.isActive ? (
                     <>
                       <PowerOff />
@@ -309,9 +316,11 @@ export function UsersDataTable({
   const currentPage = table.getState().pagination.pageIndex + 1;
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-sm flex-1">
+    <Card className="gap-0 border border-slate-200 p-4 shadow-sm ring-0">
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        {headerActions}
+
+        <div className="relative w-full max-w-sm">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
           <Input
             placeholder="Search users..."
@@ -320,12 +329,10 @@ export function UsersDataTable({
             className="h-9 pl-9"
           />
         </div>
-
-        {headerActions}
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white">
-        <Table>
+      <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
+        <Table className="text-xs">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -368,7 +375,7 @@ export function UsersDataTable({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="mt-3 flex items-center justify-between">
         <p className="text-xs text-slate-500">
           {filteredCount} of {users.length} user{users.length === 1 ? "" : "s"}
         </p>
@@ -400,6 +407,6 @@ export function UsersDataTable({
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

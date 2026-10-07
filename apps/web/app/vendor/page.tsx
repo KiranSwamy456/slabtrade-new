@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useAuthGuard } from "@/lib/auth/auth-guard";
 import { authStorage } from "@/lib/auth/auth-storage";
 import { slabService, type SlabListing } from "@/services/slab.service";
+import { orderService, type VendorOrderItem } from "@/services/order.service";
 import { AccountOverviewCard } from "@/components/dashboard/AccountOverviewCard";
 import { VendorStatCards } from "@/components/dashboard/vendor/VendorStatCards";
 import { ListingsTrendChart } from "@/components/dashboard/vendor/ListingsTrendChart";
@@ -27,6 +28,7 @@ export default function VendorPage() {
   const { user } = useAuthGuard({ allowedRoles: ["vendor"] });
 
   const [listings, setListings] = useState<SlabListing[]>([]);
+  const [orderItems, setOrderItems] = useState<VendorOrderItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,9 +46,14 @@ export default function VendorPage() {
       return;
     }
 
-    slabService
-      .getMySlabListings(accessToken)
-      .then((response) => setListings(response.data))
+    Promise.all([
+      slabService.getMySlabListings(accessToken),
+      orderService.getVendorOrderItems(accessToken),
+    ])
+      .then(([listingsResponse, ordersResponse]) => {
+        setListings(listingsResponse.data);
+        setOrderItems(ordersResponse.data);
+      })
       .catch((error) => {
         toast.error("Failed to load dashboard", {
           description:
@@ -104,7 +111,7 @@ export default function VendorPage() {
 
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <VendorOrdersCard />
+              <VendorOrdersCard items={orderItems} />
             </div>
             <AccountOverviewCard user={user} className="h-full" />
           </div>

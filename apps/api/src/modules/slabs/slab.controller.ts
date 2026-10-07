@@ -48,6 +48,24 @@ export class SlabController {
     }
   };
 
+  getMarketplaceListings = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const listings = await this.slabService.getMarketplaceListings();
+
+      res.status(200).json({
+        success: true,
+        message: "Marketplace listings fetched successfully",
+        data: listings,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   getMyListings = async (
     req: Request,
     res: Response,
@@ -71,6 +89,65 @@ export class SlabController {
         success: true,
         message: "Slab listings fetched successfully",
         data: listings,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getAdminListings = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const listings = await this.slabService.getAdminListings();
+
+      res.status(200).json({
+        success: true,
+        message: "Slab listings fetched successfully",
+        data: listings,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  approveListing = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const listing = await this.slabService.approveListing(
+        req.params.id as string,
+        req.body,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Slab listing approved",
+        data: listing,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  rejectListing = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const listing = await this.slabService.rejectListing(
+        req.params.id as string,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Slab listing rejected",
+        data: listing,
       });
     } catch (error) {
       next(error);

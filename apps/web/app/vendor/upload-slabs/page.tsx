@@ -7,14 +7,27 @@ import { toast } from "sonner";
 
 /* eslint-disable @next/next/no-img-element -- local blob: preview URLs aren't supported by next/image */
 
-import { createSlabListingSchema } from "@/lib/validations/slab";
-import { slabService } from "@/services/slab.service";
+import {
+  createSlabListingSchema,
+  PORT_OF_LOADING_OPTIONS,
+} from "@/lib/validations/slab";
+import {
+  slabService,
+  type CreateSlabListingRequest,
+} from "@/services/slab.service";
 import { authStorage } from "@/lib/auth/auth-storage";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 type SlabFormData = {
@@ -28,6 +41,7 @@ type SlabFormData = {
   unitPrice: string;
   colorCategory: "Dark" | "Light" | "White";
   veinPattern: "Long" | "Short";
+  portOfLoading: (typeof PORT_OF_LOADING_OPTIONS)[number] | "";
 };
 
 const INITIAL_FORM_DATA: SlabFormData = {
@@ -41,6 +55,7 @@ const INITIAL_FORM_DATA: SlabFormData = {
   unitPrice: "",
   colorCategory: "Dark",
   veinPattern: "Long",
+  portOfLoading: "",
 };
 
 const THICKNESS_OPTIONS: {
@@ -192,6 +207,7 @@ export default function UploadSlabsPage() {
       unitPrice: toNumber(formData.unitPrice),
       colorCategory: formData.colorCategory,
       veinPattern: formData.veinPattern,
+      portOfLoading: formData.portOfLoading || undefined,
     };
 
     const result = createSlabListingSchema.safeParse(payload);
@@ -260,6 +276,8 @@ export default function UploadSlabsPage() {
           unitPrice: Number(formData.unitPrice),
           colorCategory: formData.colorCategory,
           veinPattern: formData.veinPattern,
+          portOfLoading:
+            formData.portOfLoading as CreateSlabListingRequest["portOfLoading"],
           images,
         },
         accessToken,
@@ -318,28 +336,64 @@ export default function UploadSlabsPage() {
               </p>
             </div>
 
-            <div className="mb-4 flex flex-col gap-1.5">
-              <Label htmlFor="materialName" className="text-xs text-slate-700">
-                Material name <span className="text-red-500">*</span>
-              </Label>
+            <div className="mb-4 grid grid-cols-2 gap-4 max-[700px]:grid-cols-1">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="materialName" className="text-xs text-slate-700">
+                  Material name <span className="text-red-500">*</span>
+                </Label>
 
-              <Input
-                id="materialName"
-                type="text"
-                placeholder="Calacatta Gold"
-                value={formData.materialName}
-                onChange={(event) =>
-                  handleChange("materialName", event.target.value)
-                }
-                disabled={loading}
-                className="h-8"
-              />
+                <Input
+                  id="materialName"
+                  type="text"
+                  placeholder="Calacatta Gold"
+                  value={formData.materialName}
+                  onChange={(event) =>
+                    handleChange("materialName", event.target.value)
+                  }
+                  disabled={loading}
+                  className="h-8"
+                />
 
-              {errors.materialName && (
-                <small className="text-xs text-red-600">
-                  {errors.materialName}
-                </small>
-              )}
+                {errors.materialName && (
+                  <small className="text-xs text-red-600">
+                    {errors.materialName}
+                  </small>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label className="text-xs text-slate-700">
+                  Port of loading <span className="text-red-500">*</span>
+                </Label>
+
+                <Select
+                  value={formData.portOfLoading}
+                  onValueChange={(value) =>
+                    handleChange(
+                      "portOfLoading",
+                      value as SlabFormData["portOfLoading"],
+                    )
+                  }
+                  disabled={loading}
+                >
+                  <SelectTrigger className="h-8 w-full">
+                    <SelectValue placeholder="Select a port" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PORT_OF_LOADING_OPTIONS.map((port) => (
+                      <SelectItem key={port} value={port}>
+                        {port}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {errors.portOfLoading && (
+                  <small className="text-xs text-red-600">
+                    {errors.portOfLoading}
+                  </small>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 max-[700px]:grid-cols-1">
@@ -492,7 +546,7 @@ export default function UploadSlabsPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 max-[700px]:grid-cols-1">
+            <div className="grid grid-cols-4 gap-4 max-[900px]:grid-cols-2 max-[420px]:grid-cols-1">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="lengthMin" className="text-xs text-slate-700">
                   Length min (inches) <span className="text-red-500">*</span>
@@ -540,13 +594,7 @@ export default function UploadSlabsPage() {
                   </small>
                 )}
               </div>
-            </div>
 
-            <p className="mt-1.5 text-xs text-slate-500">
-              Valid range: 100–140 inches.
-            </p>
-
-            <div className="mt-4 grid grid-cols-2 gap-4 max-[700px]:grid-cols-1">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="widthMin" className="text-xs text-slate-700">
                   Width min (inches) <span className="text-red-500">*</span>
@@ -597,7 +645,7 @@ export default function UploadSlabsPage() {
             </div>
 
             <p className="mt-1.5 text-xs text-slate-500">
-              Valid range: 57–85 inches.
+              Valid range: Length 100–140 inches · Width 57–85 inches.
             </p>
 
             {areaMin !== undefined && areaMax !== undefined && (

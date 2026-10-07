@@ -11,11 +11,24 @@ export type CreateSlabListingRequest = {
   unitPrice: number;
   colorCategory: "Dark" | "Light" | "White";
   veinPattern: "Long" | "Short";
+  portOfLoading:
+    | "Mundra"
+    | "Kandla"
+    | "Nhava Sheva (JNPT)"
+    | "Chennai"
+    | "Kolkata"
+    | "Savannah"
+    | "Houston"
+    | "Baltimore"
+    | "New York/New Jersey"
+    | "Long Beach";
   images?: File[];
 };
 
 /** 1 = active (visible to buyers), 0 = inactive */
 export type SlabStatus = 0 | 1;
+
+export type SlabApprovalStatus = "Pending" | "Approved" | "Rejected";
 
 export type SlabListing = Omit<CreateSlabListingRequest, "images"> & {
   id: string;
@@ -23,6 +36,7 @@ export type SlabListing = Omit<CreateSlabListingRequest, "images"> & {
   lotsPerContainer: number;
   images: string[];
   status: SlabStatus;
+  approvalStatus: SlabApprovalStatus;
   createdAt: string;
 };
 
@@ -38,7 +52,38 @@ export type ListSlabListingsResponse = {
   data: SlabListing[];
 };
 
+export type MarketplaceSlabListing = SlabListing & { vendorName: string };
+
+export type ListMarketplaceListingsResponse = {
+  success: boolean;
+  message: string;
+  data: MarketplaceSlabListing[];
+};
+
 export type UpdateSlabStatusResponse = {
+  success: boolean;
+  message: string;
+  data: SlabListing;
+};
+
+export type AdminSlabListing = SlabListing & {
+  vendorName: string;
+  customerPrice: number | null;
+};
+
+export type ListAdminSlabListingsResponse = {
+  success: boolean;
+  message: string;
+  data: AdminSlabListing[];
+};
+
+export type ApproveSlabListingResponse = {
+  success: boolean;
+  message: string;
+  data: SlabListing;
+};
+
+export type RejectSlabListingResponse = {
   success: boolean;
   message: string;
   data: SlabListing;
@@ -77,6 +122,15 @@ export const slabService = {
     });
   },
 
+  async getMarketplaceListings(
+    accessToken: string,
+  ): Promise<ListMarketplaceListingsResponse> {
+    return apiRequest<ListMarketplaceListingsResponse>("/slabs/marketplace", {
+      method: "GET",
+      token: accessToken,
+    });
+  },
+
   async updateSlabStatus(
     id: string,
     status: SlabStatus,
@@ -86,6 +140,37 @@ export const slabService = {
       method: "PATCH",
       token: accessToken,
       body: JSON.stringify({ status }),
+    });
+  },
+
+  async getAdminListings(
+    accessToken: string,
+  ): Promise<ListAdminSlabListingsResponse> {
+    return apiRequest<ListAdminSlabListingsResponse>("/slabs/admin", {
+      method: "GET",
+      token: accessToken,
+    });
+  },
+
+  async approveSlabListing(
+    id: string,
+    customerPrice: number,
+    accessToken: string,
+  ): Promise<ApproveSlabListingResponse> {
+    return apiRequest<ApproveSlabListingResponse>(`/slabs/${id}/approve`, {
+      method: "PATCH",
+      token: accessToken,
+      body: JSON.stringify({ customerPrice }),
+    });
+  },
+
+  async rejectSlabListing(
+    id: string,
+    accessToken: string,
+  ): Promise<RejectSlabListingResponse> {
+    return apiRequest<RejectSlabListingResponse>(`/slabs/${id}/reject`, {
+      method: "PATCH",
+      token: accessToken,
     });
   },
 };

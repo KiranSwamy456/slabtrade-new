@@ -16,6 +16,7 @@ interface DashboardLayoutProps {
   allowedRoles: RoleName[];
   navItems: DashboardNavItem[];
   title: string;
+  headerActions?: ReactNode;
   children: ReactNode;
 }
 
@@ -23,6 +24,7 @@ export function DashboardLayout({
   allowedRoles,
   navItems,
   title,
+  headerActions,
   children,
 }: DashboardLayoutProps) {
   const { user, isLoading, isAuthorized } = useAuthGuard({ allowedRoles });
@@ -54,6 +56,12 @@ export function DashboardLayout({
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-sm font-semibold text-slate-900">{title}</h1>
+
+          {headerActions && (
+            <div className="ml-auto flex items-center gap-2">
+              {headerActions}
+            </div>
+          )}
         </header>
 
         <div className="dashboard-canvas flex-1 p-6">{children}</div>
