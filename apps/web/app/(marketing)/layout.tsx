@@ -1,4 +1,9 @@
 import { Plus_Jakarta_Sans, Syne } from "next/font/google";
+import { ReactLenis } from "lenis/react";
+
+import { CustomCursor } from "@/components/site/CustomCursor";
+
+import "lenis/dist/lenis.css";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -19,7 +24,10 @@ export default function MarketingLayout({
 }>) {
   return (
     <div className={`marketing-canvas min-h-screen text-[#101820] ${jakarta.variable} ${syne.variable}`}>
-      {children}
+      <CustomCursor />
+      <ReactLenis root options={{ lerp: 0.1, smoothWheel: true }}>
+        {children}
+      </ReactLenis>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import {
   ArrowRight,
   Check,
@@ -19,6 +19,7 @@ import {
   featuredProducts,
   heroImage,
   enquireHref,
+  originOptions,
   products,
   productHref,
   sellerShowcaseImage,
@@ -29,6 +30,19 @@ import {
 import { LogoMark } from "@/components/site/MarketingLogo";
 import { MarketingFooter } from "@/components/site/MarketingFooter";
 import { HeroBackgroundImage, OptimizedImage, SIZE_PRESETS } from "@/components/site/OptimizedImage";
+import { AnimatedStat } from "@/components/site/AnimatedStat";
+import { MagneticButton } from "@/components/site/MagneticButton";
+import { OriginMarquee } from "@/components/site/OriginMarquee";
+import { SplitText } from "@/components/site/SplitText";
+import { TiltCard } from "@/components/site/TiltCard";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 
 const navItems = [
   { label: "Home", href: "#home" },
@@ -85,12 +99,45 @@ export default function Home() {
   const featuredHeroSlab = (products[1] ?? products[0])!;
   const inventoryCount = products.length;
 
+  const { scrollYProgress } = useScroll();
+  const progressScaleX = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 24,
+    restDelta: 0.001,
+  });
+
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroImageY = useTransform(heroProgress, [0, 1], ["0%", "18%"]);
+  const heroContentY = useTransform(heroProgress, [0, 1], ["0%", "-8%"]);
+  const heroContentOpacity = useTransform(heroProgress, [0, 0.85], [1, 0.25]);
+
+  const [testimonialApi, setTestimonialApi] = useState<CarouselApi>();
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
+
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 480);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!testimonialApi) {
+      return;
+    }
+
+    const onSelect = () => setTestimonialIndex(testimonialApi.selectedScrollSnap());
+    onSelect();
+    testimonialApi.on("select", onSelect);
+
+    return () => {
+      testimonialApi.off("select", onSelect);
+    };
+  }, [testimonialApi]);
 
   const fadeUp = (delay = 0) => ({
     initial: reduceMotion ? false : { opacity: 0, y: 28 },
@@ -116,6 +163,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-hidden text-[#20201d]">
+      <motion.div
+        className="fixed top-0 right-0 left-0 z-50 h-[3px] origin-left bg-gradient-to-r from-[#6fc4bf] to-[#0d5c63]"
+        style={{ scaleX: progressScaleX }}
+      />
+
       <nav className="absolute top-0 right-0 left-0 z-30 px-4 pt-4 lg:px-8">
         <div className="glass-nav mx-auto flex h-[4.25rem] max-w-[1440px] items-center justify-between rounded-2xl px-5 lg:px-8">
           <a href="#home" className="group flex items-center gap-3" onClick={closeMenu}>
@@ -162,13 +214,35 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <section id="home" className="relative flex min-h-[100svh] items-end overflow-hidden bg-[#262721] px-5 pt-28 pb-16 sm:min-h-[760px] sm:px-6 sm:pt-36 sm:pb-20 lg:min-h-[860px] lg:px-16 lg:pb-24">
-        <HeroBackgroundImage src={heroImage} alt="Calacatta Oceana natural stone slab" />
+      <section
+        ref={heroRef}
+        id="home"
+        className="relative flex min-h-[100svh] items-end overflow-hidden bg-[#262721] px-5 pt-28 pb-16 sm:min-h-[760px] sm:px-6 sm:pt-36 sm:pb-20 lg:min-h-[860px] lg:px-16 lg:pb-24"
+      >
+        <motion.div className="absolute inset-0" style={{ y: heroImageY }}>
+          <HeroBackgroundImage src={heroImage} alt="Calacatta Oceana natural stone slab" />
+        </motion.div>
         <div className="absolute inset-0 bg-[linear-gradient(105deg,rgba(8,59,64,.96)_0%,rgba(8,59,64,.78)_50%,rgba(8,59,64,.28)_100%)] sm:bg-[linear-gradient(105deg,rgba(8,59,64,.95)_0%,rgba(8,59,64,.72)_46%,rgba(8,59,64,.18)_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(8,59,64,.9),transparent_58%)]" />
+        <div className="grain-overlay" />
         <div className="pointer-events-none absolute top-24 -right-20 h-72 w-72 rounded-full bg-[#6fc4bf]/20 blur-3xl" />
 
-        <div className="relative z-10 mx-auto grid w-full max-w-[1440px] items-end gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,420px)] lg:gap-14">
+        <svg
+          aria-hidden
+          viewBox="0 0 1440 80"
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 h-12 w-full sm:h-16"
+        >
+          <path
+            d="M0,40 C240,90 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z"
+            fill="#0a3338"
+          />
+        </svg>
+
+        <motion.div
+          className="relative z-10 mx-auto grid w-full max-w-[1440px] items-end gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,420px)] lg:gap-14"
+          style={{ y: heroContentY, opacity: heroContentOpacity }}
+        >
           <div className="max-w-2xl">
             <motion.div className="mb-6 flex items-center gap-3 text-[11px] font-bold tracking-[0.22em] text-[#6fc4bf] uppercase sm:mb-8" {...fadeUp(0.1)}>
               <motion.span
@@ -180,31 +254,23 @@ export default function Home() {
               The better way to buy stone
             </motion.div>
 
-            <motion.h1 className="max-w-3xl font-serif text-[clamp(2.6rem,11vw,6.8rem)] leading-[.92] tracking-[-.05em] text-white" {...fadeUp(0.2)}>
-              Find the slab
+            <h1 className="max-w-3xl font-serif text-[clamp(2.6rem,11vw,6.8rem)] leading-[.92] tracking-[-.05em] text-white">
+              <SplitText text="Find the slab" delay={0.2} />
               <br />
-              <i className="text-[#6fc4bf]">behind the vision.</i>
-            </motion.h1>
+              <i className="text-[#6fc4bf]">
+                <SplitText text="behind the vision." delay={0.5} />
+              </i>
+            </h1>
 
             <motion.p className="mt-6 max-w-lg text-base leading-7 text-white/70 sm:mt-8 sm:text-lg sm:leading-8" {...fadeUp(0.35)}>
               A more thoughtful marketplace for exceptional natural stone. Discover, compare, and connect directly with trusted suppliers.
             </motion.p>
 
             <motion.div className="mt-8 flex flex-wrap gap-3 sm:mt-10" {...fadeUp(0.48)}>
-              <motion.a
-                href="#buyers"
-                className="btn-soft"
-                initial="rest"
-                whileHover={reduceMotion ? undefined : "hover"}
-                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-                variants={{ rest: { y: 0, scale: 1 }, hover: { y: -4, scale: 1.02 } }}
-                transition={{ type: "spring", stiffness: 400, damping: 22 }}
-              >
+              <MagneticButton href="#buyers" className="btn-soft">
                 Explore slabs
-                <motion.span className="inline-flex" variants={{ rest: { x: 0 }, hover: { x: 5 } }} transition={{ type: "spring", stiffness: 400, damping: 20 }}>
-                  <ArrowRight className="h-4 w-4" />
-                </motion.span>
-              </motion.a>
+                <ArrowRight className="h-4 w-4" />
+              </MagneticButton>
               <motion.a
                 href="#how-it-works"
                 className="btn-ghost"
@@ -228,40 +294,39 @@ export default function Home() {
           </div>
 
           <motion.div className="hidden w-full max-w-md justify-self-end lg:block" {...fadeUp(0.45)}>
-            <Link
-              href={productHref(featuredHeroSlab.slug)}
-              className="group relative block overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/5 shadow-[0_30px_80px_rgba(0,0,0,.35)] backdrop-blur-md"
-            >
-              <div className="relative aspect-[4/5] overflow-hidden">
-                <OptimizedImage
-                  src={featuredHeroSlab.image}
-                  alt={featuredHeroSlab.name}
-                  fill
-                  sizes="(max-width: 1024px) 0px, 420px"
-                  priority
-                  className="object-cover transition duration-700 group-hover:scale-[1.04]"
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_35%,rgba(8,59,64,.92)_100%)]" />
-                <div className="absolute top-5 left-5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-[11px] font-bold tracking-[0.16em] text-white uppercase backdrop-blur-md">
-                  Featured
+            <TiltCard className="group relative block overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/5 shadow-[0_30px_80px_rgba(0,0,0,.35)] backdrop-blur-md">
+              <Link href={productHref(featuredHeroSlab.slug)} className="block">
+                <div className="relative aspect-[4/5] overflow-hidden">
+                  <OptimizedImage
+                    src={featuredHeroSlab.image}
+                    alt={featuredHeroSlab.name}
+                    fill
+                    sizes="(max-width: 1024px) 0px, 420px"
+                    priority
+                    className="object-cover transition duration-700 group-hover:scale-[1.04]"
+                  />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_35%,rgba(8,59,64,.92)_100%)]" />
+                  <div className="absolute top-5 left-5 rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-[11px] font-bold tracking-[0.16em] text-white uppercase backdrop-blur-md">
+                    Featured
+                  </div>
+                  <div className="absolute right-0 bottom-0 left-0 p-6 text-white">
+                    <p className="text-[11px] font-bold tracking-[0.18em] text-[#6fc4bf] uppercase">
+                      {featuredHeroSlab.type} · {featuredHeroSlab.origin}
+                    </p>
+                    <h2 className="mt-2 font-serif text-3xl leading-none tracking-[-.03em]">
+                      {featuredHeroSlab.name}
+                    </h2>
+                    <p className="mt-3 line-clamp-2 text-sm leading-6 text-white/70">
+                      {featuredHeroSlab.summary}
+                    </p>
+                    <span className="mt-5 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] text-[#6fc4bf] uppercase transition group-hover:gap-3">
+                      View slab
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
                 </div>
-                <div className="absolute right-0 bottom-0 left-0 p-6 text-white">
-                  <p className="text-[11px] font-bold tracking-[0.18em] text-[#6fc4bf] uppercase">
-                    {featuredHeroSlab.type} · {featuredHeroSlab.origin}
-                  </p>
-                  <h2 className="mt-2 font-serif text-3xl leading-none tracking-[-.03em]">
-                    {featuredHeroSlab.name}
-                  </h2>
-                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-white/70">
-                    {featuredHeroSlab.summary}
-                  </p>
-                  <span className="mt-5 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] text-[#6fc4bf] uppercase transition group-hover:gap-3">
-                    View slab
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
-                </div>
-              </div>
-            </Link>
+              </Link>
+            </TiltCard>
             <div className="mt-4 flex items-center justify-between gap-4 px-1 text-white/65">
               <p className="text-sm">
                 <span className="font-serif text-2xl text-white">{inventoryCount}</span>
@@ -279,15 +344,17 @@ export default function Home() {
               </motion.a>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </section>
+
+      <OriginMarquee origins={originOptions} />
 
       {/* Trust */}
       <section className="border-b border-[#c5d8dc]/80 bg-white/70">
         <div className="mx-auto grid max-w-[1440px] grid-cols-2 gap-px bg-[#c5d8dc]/60 sm:grid-cols-4">
           {trustPoints.map((item, index) => (
             <motion.div key={item.label} className="bg-[#f3faf9] px-5 py-8 sm:px-8 sm:py-10" {...reveal(index * 0.06)}>
-              <p className="font-serif text-3xl tracking-[-0.03em] text-[#0d5c63] sm:text-4xl">{item.value}</p>
+              <AnimatedStat value={item.value} />
               <p className="mt-2 text-[11px] font-bold tracking-[0.16em] text-[#101820] uppercase">{item.label}</p>
               <p className="mt-2 text-sm text-[#5b6c74]">{item.note}</p>
             </motion.div>
@@ -299,6 +366,18 @@ export default function Home() {
       <section id="buyers" className="mx-auto max-w-[1440px] px-6 py-24 lg:px-16 lg:py-32">
         <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <motion.div {...reveal(0)}>
+            <svg aria-hidden viewBox="0 0 160 24" className="mb-3 h-5 w-24 text-[#0d5c63]" fill="none">
+              <motion.path
+                d="M2 18 Q 40 2, 78 16 T 158 12"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                initial={{ pathLength: 0, opacity: 0 }}
+                whileInView={{ pathLength: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={reduceMotion ? { duration: 0 } : { duration: 1.1, ease }}
+              />
+            </svg>
             <p className="label-eyebrow mb-4">The collection</p>
             <h2 className="max-w-xl font-serif text-5xl leading-[.95] tracking-[-.04em] md:text-6xl lg:text-7xl">
               Materials with
@@ -322,40 +401,42 @@ export default function Home() {
               whileHover={reduceMotion ? undefined : { y: -8 }}
               transition={reduceMotion ? { duration: 0 } : { duration: 0.75, ease, delay: index * 0.12 }}
             >
-              <Link href={productHref(slab.slug)} className="relative aspect-[4/5] overflow-hidden bg-[#d2ecea] sm:aspect-[.76]">
-                <motion.div
-                  className="absolute inset-0"
-                  initial={reduceMotion ? false : { opacity: 0, scale: 1.12 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true, amount: 0.35 }}
-                  transition={reduceMotion ? { duration: 0 } : { duration: 1.1, ease, delay: index * 0.08 }}
-                  whileHover={reduceMotion ? undefined : { scale: 1.05, transition: { duration: 0.75, ease } }}
-                >
-                  <OptimizedImage src={slab.image} alt={slab.name} sizes={SIZE_PRESETS.card} quality={78} />
-                </motion.div>
-              </Link>
-              <div className="flex flex-1 flex-col p-5 sm:p-6">
-                <Link href={productHref(slab.slug)}>
-                  <div className="mb-2 flex items-start justify-between gap-3">
-                    <p className="font-serif text-xl tracking-[-0.03em] sm:text-2xl">{slab.name}</p>
-                    <span className="shrink-0 rounded-xl border border-[#c5d8dc] bg-[#e7f5f4] px-2.5 py-1 text-[10px] font-semibold tracking-widest text-[#0d5c63] uppercase">{slab.type}</span>
-                  </div>
-                  <p className="text-sm text-[#5b6c74]">
-                    {slab.origin} <span className="mx-2">·</span> {slab.tone}
-                  </p>
-                  <p className="mt-2 text-[12px] font-medium text-[#0d5c63]/80">
-                    {slab.finish} · {slab.availability}
-                  </p>
+              <TiltCard className="flex h-full flex-col" maxTilt={4}>
+                <Link href={productHref(slab.slug)} className="relative aspect-[4/5] overflow-hidden bg-[#d2ecea] sm:aspect-[.76]">
+                  <motion.div
+                    className="absolute inset-0"
+                    initial={reduceMotion ? false : { opacity: 0, scale: 1.12 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, amount: 0.35 }}
+                    transition={reduceMotion ? { duration: 0 } : { duration: 1.1, ease, delay: index * 0.08 }}
+                    whileHover={reduceMotion ? undefined : { scale: 1.05, transition: { duration: 0.75, ease } }}
+                  >
+                    <OptimizedImage src={slab.image} alt={slab.name} sizes={SIZE_PRESETS.card} quality={78} />
+                  </motion.div>
                 </Link>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <Link href={productHref(slab.slug)} className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#c5d8dc] bg-white px-4 py-3 text-sm font-semibold text-[#0d5c63] sm:flex-none">
-                    View details
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
+                  <Link href={productHref(slab.slug)}>
+                    <div className="mb-2 flex items-start justify-between gap-3">
+                      <p className="font-serif text-xl tracking-[-0.03em] sm:text-2xl">{slab.name}</p>
+                      <span className="shrink-0 rounded-xl border border-[#c5d8dc] bg-[#e7f5f4] px-2.5 py-1 text-[10px] font-semibold tracking-widest text-[#0d5c63] uppercase">{slab.type}</span>
+                    </div>
+                    <p className="text-sm text-[#5b6c74]">
+                      {slab.origin} <span className="mx-2">·</span> {slab.tone}
+                    </p>
+                    <p className="mt-2 text-[12px] font-medium text-[#0d5c63]/80">
+                      {slab.finish} · {slab.availability}
+                    </p>
                   </Link>
-                  <Link href={enquireHref(slab.name)} className="btn-primary !py-3 flex-1 justify-center sm:flex-none">
-                    Enquire <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <Link href={productHref(slab.slug)} className="inline-flex flex-1 items-center justify-center rounded-2xl border border-[#c5d8dc] bg-white px-4 py-3 text-sm font-semibold text-[#0d5c63] sm:flex-none">
+                      View details
+                    </Link>
+                    <Link href={enquireHref(slab.name)} className="btn-primary !py-3 flex-1 justify-center sm:flex-none">
+                      Enquire <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              </TiltCard>
             </motion.article>
           ))}
         </div>
@@ -363,6 +444,7 @@ export default function Home() {
 
       {/* Material story */}
       <section className="relative overflow-hidden bg-[#083b40] px-6 py-24 text-white lg:px-16 lg:py-28">
+        <div className="grain-overlay" />
         <div className="pointer-events-none absolute top-0 -right-24 h-80 w-80 rounded-full bg-[#6fc4bf]/15 blur-3xl" />
         <div className="mx-auto grid max-w-[1440px] items-center gap-12 lg:grid-cols-2 lg:gap-20">
           <motion.div className="relative order-2 overflow-hidden rounded-[1.75rem] lg:order-1" {...revealScale(0)}>
@@ -391,6 +473,7 @@ export default function Home() {
 
       {/* How it works */}
       <section id="how-it-works" className="relative overflow-hidden bg-[#25261f] px-6 py-24 text-[#f4f1eb] lg:px-16 lg:py-28">
+        <div className="grain-overlay" />
         <div className="pointer-events-none absolute top-10 -left-24 h-64 w-64 rounded-full bg-[#6fc4bf]/10 blur-3xl" />
         <div className="mx-auto max-w-[1440px]">
           <div className="grid gap-14 lg:grid-cols-[.9fr_1.1fr] lg:gap-24">
@@ -496,22 +579,56 @@ export default function Home() {
               <i className="text-[#0d5c63]">Remembered for longer.</i>
             </h2>
           </motion.div>
-          <div className="grid gap-5 md:grid-cols-3 md:gap-6">
-            {testimonials.map((item, index) => (
-              <motion.blockquote key={item.name} className="flex h-full flex-col rounded-[1.5rem] border border-[#c5d8dc] bg-white/80 p-7 sm:p-8" {...reveal(0.08 + index * 0.1)}>
-                <p className="flex-1 text-base leading-7 text-[#5b6c74]">&ldquo;{item.quote}&rdquo;</p>
-                <footer className="mt-8 border-t border-[#c5d8dc]/80 pt-5">
-                  <p className="font-semibold text-[#101820]">{item.name}</p>
-                  <p className="mt-1 text-sm text-[#5b6c74]">{item.role}</p>
-                </footer>
-              </motion.blockquote>
-            ))}
-          </div>
+          <motion.div {...reveal(0.1)}>
+            <Carousel
+              setApi={setTestimonialApi}
+              opts={{ align: "start", loop: true }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {testimonials.map((item) => (
+                  <CarouselItem key={item.name} className="md:basis-1/2 lg:basis-1/3">
+                    <blockquote className="flex h-full flex-col rounded-[1.5rem] border border-[#c5d8dc] bg-white/80 p-7 sm:p-8">
+                      <p className="flex-1 text-base leading-7 text-[#5b6c74]">&ldquo;{item.quote}&rdquo;</p>
+                      <footer className="mt-8 border-t border-[#c5d8dc]/80 pt-5">
+                        <p className="font-semibold text-[#101820]">{item.name}</p>
+                        <p className="mt-1 text-sm text-[#5b6c74]">{item.role}</p>
+                      </footer>
+                    </blockquote>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+
+              <div className="mt-8 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {testimonials.map((item, index) => (
+                    <button
+                      key={item.name}
+                      type="button"
+                      aria-label={`Show testimonial ${index + 1}`}
+                      onClick={() => testimonialApi?.scrollTo(index)}
+                      className={`h-2 rounded-full transition-all ${
+                        index === testimonialIndex
+                          ? "w-6 bg-[#0d5c63]"
+                          : "w-2 bg-[#c5d8dc] hover:bg-[#8fb0b5]"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <CarouselPrevious className="static translate-x-0 translate-y-0" />
+                  <CarouselNext className="static translate-x-0 translate-y-0" />
+                </div>
+              </div>
+            </Carousel>
+          </motion.div>
         </div>
       </section>
 
       {/* Contact */}
       <section id="contact" className="relative overflow-hidden bg-[#0d5c63] px-6 py-24 text-white lg:px-16 lg:py-28">
+        <div className="grain-overlay" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(111,196,191,.35),transparent_55%)]" />
         <div className="pointer-events-none absolute bottom-0 left-1/2 h-40 w-[70%] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
         <div className="relative z-10 mx-auto max-w-[1440px] text-center">
